@@ -5,6 +5,35 @@ build/
 dist/
 wheels/
 *.egg-info
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
 
 # Virtual environments
 .venv
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+
+# Local application data
+/data/
+*.db
+*.sqlite
+*.sqlite3
+
+# Frontend dependencies and build output
+node_modules/
+.next/
+out/
+
+# Terraform state, plans, and variable files
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfplan
+backend.hcl
+crash.log
