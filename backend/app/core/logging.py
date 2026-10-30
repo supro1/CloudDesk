@@ -2,8 +2,12 @@ from __future__ import annotations
 
 import json
 import logging
+from contextvars import ContextVar
 from datetime import datetime, timezone
 from typing import Any
+
+
+request_id_context: ContextVar[str | None] = ContextVar("request_id", default=None)
 
 
 class JsonFormatter(logging.Formatter):
@@ -19,6 +23,8 @@ class JsonFormatter(logging.Formatter):
 
         for field in ("request_id", "workflow_id"):
             value = getattr(record, field, None)
+            if value is None and field == "request_id":
+                value = request_id_context.get()
             if value is not None:
                 payload[field] = value
 
