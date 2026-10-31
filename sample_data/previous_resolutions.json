@@ -1,0 +1,28 @@
+[
+  {
+    "ticket_number": "CD-1008",
+    "resolution": "Reconnected the authorized Slack workspace and refreshed the integration subscription.",
+    "steps": [
+      "Confirm the workspace integration is still authorized.",
+      "Reconnect the integration from workspace settings.",
+      "Send a test notification and verify delivery."
+    ]
+  },
+  {
+    "ticket_number": "CD-1010",
+    "resolution": "Confirmed that a dark appearance option is not currently available and recorded the request as product feedback.",
+    "steps": [
+      "Check the current appearance options in profile settings.",
+      "Record the feature request for product review."
+    ]
+  },
+  {
+    "ticket_number": "CD-1012",
+    "resolution": "Restored access using the documented MFA recovery procedure after verifying the user's identity.",
+    "steps": [
+      "Verify the requester's identity using the account recovery process.",
+      "Follow the approved MFA reset procedure.",
+      "Have the user enroll a new authenticator after signing in."
+    ]
+  }
+]

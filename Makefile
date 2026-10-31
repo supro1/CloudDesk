@@ -12,7 +12,7 @@ PORT ?= 8000
 help:
 	@echo "setup   Sync dependencies and create .env from .env.example if absent"
 	@echo "backend Run the FastAPI development server"
-	@echo "demo    Start the Phase 1 runtime demo (workflow components are not ready)"
+	@echo "demo    Start the backend; demo fixtures load on startup when DEMO_MODE=true"
 	@echo "test    Run the offline test suite"
 	@echo "lint    Run Ruff on backend and tests"
 
@@ -24,7 +24,7 @@ backend:
 	$(PYTHON) -m uvicorn backend.app.main:app --reload --host $(HOST) --port $(PORT)
 
 demo:
-	@echo "Phase 1 runtime demo only: sample tickets and support workflows are not implemented yet."
+	@echo "Demo fixtures load on startup when DEMO_MODE=true; workflow components are not ready yet."
 	@$(MAKE) backend
 
 test:

@@ -9,15 +9,20 @@ from fastapi.middleware.cors import CORSMiddleware
 from backend.app.api.health import HealthCheck
 from backend.app.api.health import router as health_router
 from backend.app.core.config import Settings, get_settings
-from backend.app.core.database import create_tables, dispose_engine
+from backend.app.core.database import create_tables, dispose_engine, session_factory
 from backend.app.core.logging import setup_logging
 from backend.app.middleware.request_id import RequestIdMiddleware
+from backend.app.services.seed_service import bootstrap_demo_data
 
 
 @asynccontextmanager
-async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     try:
         await create_tables()
+        settings: Settings = app.state.settings
+        if settings.demo_mode:
+            async with session_factory() as session:
+                await bootstrap_demo_data(session, settings.sample_data_dir)
         yield
     finally:
         await dispose_engine()
@@ -31,6 +36,7 @@ def create_app(
     setup_logging(settings.log_level)
 
     app = FastAPI(title="CloudDesk Support API", lifespan=lifespan)
+    app.state.settings = settings
     app.state.readiness_checks = (
         readiness_checks if readiness_checks is not None else {"application": lambda: True}
     )
