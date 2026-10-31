@@ -27,14 +27,15 @@ status change. Do not treat plans as implementation evidence.
 Last checked while creating this file:
 
 - The working tree contains the starter package under `src/project_1/` and
-  initial backend core settings and JSON logging modules under
-  `backend/app/core/`.
-- The platform backend, frontend, database, RAG, workflow, and deployment
-  implementation described in `CLAUDE.md` is otherwise not yet present.
+  backend core settings and JSON logging modules, health routes, and request-ID
+  handling.
+- P2-1 adds SQLAlchemy 2 entities for all 16 specified data tables and the
+  shared ten-value ticket category enum. Repository, database initialization,
+  schema migrations, seed data, and the remaining platform features are not
+  implemented yet.
 - `README.md` is only a placeholder at this point.
-- P1-1 settings and JSON logging, P1-2 health/request-ID handling, and P1-3
-  offline pytest setup are implemented. The current 16-test suite passed locally
-  with pytest; broader platform tests, builds, and CI have not been run.
+- P1-1 through P1-4 and P2-1 are implemented. Local validation status is listed
+  below; broader platform builds and CI have not been run.
 - Cloud credentials have not been used; nothing has been applied to a real
   cloud account.
 
@@ -46,8 +47,8 @@ validation. Do not copy planned features into the implemented/validated state.
 | Area | Status |
 |---|---|
 | Product requirements and target architecture | Specified in `CLAUDE.md`; documentation support files are being established. |
-| Application implementation | P1-1 settings/logging, P1-2 health/request-ID handling, and P1-3 offline pytest harness implemented; platform runtime remains incomplete. |
-| Local validation | 16 tests passed using pytest; dependency lockfile is current. |
+| Application implementation | P1-1 through P1-4 and P2-1 implemented; platform runtime remains incomplete. |
+| Local validation | 21 tests passed with pytest; Ruff passed for backend and tests; `uv lock --check` passed. |
 | CI | Not run/confirmed. |
 | Cloud credentials and deployment | Not used; nothing deployed. |
 
