@@ -61,11 +61,14 @@ class SettingsTests(unittest.TestCase):
         self.assertEqual(settings.effective_jwt_secret, "supabase-secret")
 
     def test_dotenv_file_is_loaded(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            env_file = Path(directory) / ".env"
-            env_file.write_text("DEMO_MODE=false\nLLM_PROVIDER=fake\n", encoding="utf-8")
+        with patch.dict(os.environ, {}, clear=True):
+            with tempfile.TemporaryDirectory() as directory:
+                env_file = Path(directory) / ".env"
+                env_file.write_text(
+                    "DEMO_MODE=false\nLLM_PROVIDER=fake\n", encoding="utf-8"
+                )
 
-            settings = Settings(_env_file=env_file)
+                settings = Settings(_env_file=env_file)
 
         self.assertFalse(settings.demo_mode)
         self.assertEqual(settings.llm_provider, "fake")
