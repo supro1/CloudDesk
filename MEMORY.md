@@ -32,9 +32,11 @@ Last checked while creating this file:
 - P2-1 through P2-4 are implemented: SQLAlchemy entities, PostgreSQL schema
   and migrations, repositories, and an atomic demo bootstrap with committed
   sample fixtures. The remaining platform features are not implemented yet.
+- P3-1 is implemented: HS256 JWT verification and viewer/agent/admin role
+  enforcement, including Supabase-style `app_metadata.role` claims.
 - `README.md` is only a placeholder at this point.
-- P1-1 through P1-4 and P2-1 through P2-4 are implemented. Broader platform
-  builds and CI have not been run.
+- P1-1 through P1-4, P2-1 through P2-4, and P3-1 are implemented. Broader
+  platform builds and CI have not been run.
 - Cloud credentials have not been used; nothing has been applied to a real
   cloud account.
 
@@ -46,8 +48,8 @@ validation. Do not copy planned features into the implemented/validated state.
 | Area | Status |
 |---|---|
 | Product requirements and target architecture | Specified in `CLAUDE.md`; documentation support files are being established. |
-| Application implementation | P1-1 through P1-4 and P2-1 through P2-4 implemented; platform runtime remains incomplete. |
-| Local validation | 36 tests passed with pytest and Ruff checks passed after P2-4; `uv lock --check` passed in the earlier baseline. |
+| Application implementation | P1-1 through P1-4, P2-1 through P2-4, and P3-1 implemented; platform runtime remains incomplete. |
+| Local validation | 51 tests passed with pytest; Ruff and `uv lock --check` passed after P3-1. |
 | CI | Not run/confirmed. |
 | Cloud credentials and deployment | Not used; nothing deployed. |
 
