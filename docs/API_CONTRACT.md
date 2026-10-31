@@ -13,6 +13,9 @@ and `frontend/lib/types.ts` synchronized when implementing or changing routes.
   logs and events.
 - JSON request and response bodies use `snake_case`.
 - Errors use `{"detail": "<message>"}`.
+- Requests are limited per client IP in fixed 60-second windows using Redis.
+  Exceeding `RATE_LIMIT_PER_MINUTE` returns `429` with a `Retry-After` header;
+  an unavailable rate-limit store returns `503`.
 - Authenticated routes enforce the role table below server-side. The UI's
   disabled controls are not an authorization boundary.
 - Pagination uses `limit` and `offset` where a list endpoint supports them.

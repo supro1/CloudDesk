@@ -109,7 +109,9 @@ small and idempotent and must not perform an irreversible side effect.
 
 - **Authentication and authorization:** JWT; `viewer < agent < admin`; backend
   `require_role` is authoritative.
-- **Rate limiting:** Redis fixed window, with fakeredis in tests/demo.
+- **Rate limiting:** Redis fixed 60-second windows per client IP; fakeredis is
+  used in offline tests/demo. Requests over `RATE_LIMIT_PER_MINUTE` receive
+  `429`; Redis failures fail closed with `503`.
 - **Request correlation:** accept or create `X-Request-ID` and include it in
   response headers and structured logs.
 - **Audit:** record every state-changing request with its actor and target.
