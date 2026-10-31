@@ -12,6 +12,8 @@ from backend.app.api.health import router as health_router
 from backend.app.core.config import Settings, get_settings
 from backend.app.core.database import create_tables, dispose_engine, session_factory
 from backend.app.core.logging import setup_logging
+from backend.app.core.redis import create_redis_client
+from backend.app.middleware.rate_limit import RateLimitMiddleware
 from backend.app.middleware.request_id import RequestIdMiddleware
 from backend.app.services.seed_service import bootstrap_demo_data
 
@@ -26,7 +28,10 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
                 await bootstrap_demo_data(session, settings.sample_data_dir)
         yield
     finally:
-        await dispose_engine()
+        try:
+            await dispose_engine()
+        finally:
+            await app.state.redis_client.aclose()
 
 
 def create_app(
@@ -38,12 +43,19 @@ def create_app(
 
     app = FastAPI(title="CloudDesk Support API", lifespan=lifespan)
     app.state.settings = settings
+    redis_client = create_redis_client(settings)
+    app.state.redis_client = redis_client
     app.state.readiness_checks = (
         readiness_checks if readiness_checks is not None else {"application": lambda: True}
     )
     app.include_router(auth_router)
     app.include_router(health_router)
 
+    app.add_middleware(
+        RateLimitMiddleware,
+        redis_client=redis_client,
+        limit=settings.rate_limit_per_minute,
+    )
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins,
