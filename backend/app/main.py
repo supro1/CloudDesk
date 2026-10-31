@@ -13,6 +13,7 @@ from backend.app.core.config import Settings, get_settings
 from backend.app.core.database import create_tables, dispose_engine, session_factory
 from backend.app.core.logging import setup_logging
 from backend.app.core.redis import create_redis_client
+from backend.app.middleware.audit import AuditMiddleware
 from backend.app.middleware.rate_limit import RateLimitMiddleware
 from backend.app.middleware.request_id import RequestIdMiddleware
 from backend.app.services.seed_service import bootstrap_demo_data
@@ -63,6 +64,11 @@ def create_app(
         allow_methods=["*"],
         allow_headers=["*"],
         expose_headers=["X-Request-ID"],
+    )
+    # Keep audit outside CORS and rate limiting so short-circuited responses are recorded.
+    app.add_middleware(
+        AuditMiddleware,
+        session_factory=session_factory,
     )
     # Wrap the full stack so IDs are also attached to Starlette-generated 500 responses.
     app.middleware_stack = RequestIdMiddleware(app.build_middleware_stack())

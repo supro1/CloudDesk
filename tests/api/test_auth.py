@@ -61,7 +61,8 @@ async def auth_client() -> AsyncIterator[tuple[TestClient, Settings]]:
             yield session
 
     app.dependency_overrides[get_session] = override_session
-    yield TestClient(app), settings
+    with TestClient(app) as client:
+        yield client, settings
     await engine.dispose()
 
 
