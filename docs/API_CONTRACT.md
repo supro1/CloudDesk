@@ -66,7 +66,7 @@ Login response shape:
     "id": "<uuid>",
     "email": "sam.agent@clouddesk.demo",
     "role": "agent",
-    "display_name": "Sam Agent"
+    "display_name": "Sam Rivera"
   }
 }
 ```
@@ -75,6 +75,21 @@ Demo identities are `admin@clouddesk.demo`, `sam.agent@clouddesk.demo`, and
 `vic.viewer@clouddesk.demo`. Demo tokens expire in eight hours. Production
 authentication must validate JWTs using the configured signing secret; do not
 infer authorization from client-supplied role fields.
+
+Login request:
+
+```json
+{
+  "email": "sam.agent@clouddesk.demo"
+}
+```
+
+The login route is available only when `DEMO_MODE=true` and a JWT signing secret
+is configured. It accepts only active seeded demo profiles; unknown identities
+receive `401`, and disabled demo login receives `403`. `/me` requires a valid
+bearer token and returns the active profile associated with its subject. Demo
+login intentionally has no password verification and must remain disabled
+outside local/demo environments.
 
 ## Dashboard
 
