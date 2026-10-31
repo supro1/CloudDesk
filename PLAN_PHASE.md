@@ -27,7 +27,8 @@ changing implementation.
   `backend/app/services/seed_service.py`; `database/`; `sample_data/`;
   `tests/unit/`; `tests/api/`.
 - **Requirements:** F1, F4, F11; N6.
-- **Tests:** Model/repository CRUD, SQLite table creation, seed idempotency, and
+- **Tests:** Model/repository CRUD, SQLite table creation, PostgreSQL schema
+  parity with the SQLAlchemy entities, RLS coverage, seed idempotency, and
   database constraints.
 - **Demo checkpoint:** Demo data can be loaded into a clean local SQLite
   database.
