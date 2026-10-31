@@ -32,8 +32,9 @@ Last checked while creating this file:
 - The platform backend, frontend, database, RAG, workflow, and deployment
   implementation described in `CLAUDE.md` is otherwise not yet present.
 - `README.md` is only a placeholder at this point.
-- All seven P1-1 settings and JSON logging tests passed locally with Python `unittest`;
-  remaining platform tests, builds, and CI have not been run.
+- P1-1 settings and JSON logging, P1-2 health/request-ID handling, and P1-3
+  offline pytest setup are implemented. The current 16-test suite passed locally
+  with pytest; broader platform tests, builds, and CI have not been run.
 - Cloud credentials have not been used; nothing has been applied to a real
   cloud account.
 
@@ -45,8 +46,8 @@ validation. Do not copy planned features into the implemented/validated state.
 | Area | Status |
 |---|---|
 | Product requirements and target architecture | Specified in `CLAUDE.md`; documentation support files are being established. |
-| Application implementation | P1-1 settings and JSON logging implemented; platform runtime remains incomplete. |
-| Local validation | Seven P1-1 tests passed using Python `unittest`; Python compilation and lockfile checks passed. |
+| Application implementation | P1-1 settings/logging, P1-2 health/request-ID handling, and P1-3 offline pytest harness implemented; platform runtime remains incomplete. |
+| Local validation | 16 tests passed using pytest; dependency lockfile is current. |
 | CI | Not run/confirmed. |
 | Cloud credentials and deployment | Not used; nothing deployed. |
 
