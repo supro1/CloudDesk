@@ -1,0 +1,2 @@
+-- Application fixtures are loaded from sample_data/ by the backend bootstrap
+-- introduced in P2-4. Avoid a second source of demo records in this SQL file.
