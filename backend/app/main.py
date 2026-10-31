@@ -1,14 +1,26 @@
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import AsyncIterator, Mapping
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.app.api.health import HealthCheck, router as health_router
+from backend.app.api.health import HealthCheck
+from backend.app.api.health import router as health_router
 from backend.app.core.config import Settings, get_settings
+from backend.app.core.database import create_tables, dispose_engine
 from backend.app.core.logging import setup_logging
 from backend.app.middleware.request_id import RequestIdMiddleware
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+    try:
+        await create_tables()
+        yield
+    finally:
+        await dispose_engine()
 
 
 def create_app(
@@ -18,7 +30,7 @@ def create_app(
     settings = settings or get_settings()
     setup_logging(settings.log_level)
 
-    app = FastAPI(title="CloudDesk Support API")
+    app = FastAPI(title="CloudDesk Support API", lifespan=lifespan)
     app.state.readiness_checks = (
         readiness_checks if readiness_checks is not None else {"application": lambda: True}
     )
