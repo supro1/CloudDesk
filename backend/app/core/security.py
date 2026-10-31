@@ -79,6 +79,7 @@ async def get_current_user(
     if not isinstance(subject, str) or not subject:
         raise _unauthorized()
 
+    request.state.actor_id = subject
     email = claims.get("email")
     return AuthenticatedUser(
         subject=subject,

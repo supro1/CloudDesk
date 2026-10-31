@@ -321,7 +321,9 @@ tags, summary) → `chunk_article` → embeddings → vector store + BM25 → `r
 - **Rate limit (N2):** fixed window per client in Redis, `RATE_LIMIT_PER_MINUTE` (demo 120).
 - **Audit (N6):** `AuditMiddleware` writes `audit_logs` for every non-GET request.
 - **Request IDs (N3):** `RequestIdMiddleware` reads/creates `X-Request-ID`; exposed through CORS.
-- Middleware order (outermost last): CORS → RequestId → RateLimit → Audit.
+- Runtime middleware order (outermost to innermost): RequestId → server-error handling → Audit
+  → CORS → RateLimit. Request IDs cover generated errors, while audit records include
+  CORS preflights and rate-limit rejections.
 
 ---
 

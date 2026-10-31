@@ -58,6 +58,18 @@ def test_valid_jwt_returns_authenticated_user() -> None:
     assert user.email == "agent@clouddesk.demo"
 
 
+def test_valid_jwt_sets_audit_actor_on_request_state() -> None:
+    request = make_request(Settings(jwt_secret=JWT_SECRET, _env_file=None))
+    credentials = HTTPAuthorizationCredentials(
+        scheme="Bearer",
+        credentials=make_token(),
+    )
+
+    asyncio.run(get_current_user(request, credentials))
+
+    assert request.state.actor_id == "user-123"
+
+
 def test_supabase_app_metadata_role_is_used() -> None:
     user = authenticate(
         make_token(
