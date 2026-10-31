@@ -1,0 +1,23 @@
+[
+  {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "email": "admin@clouddesk.demo",
+    "display_name": "CloudDesk Admin",
+    "role": "admin",
+    "is_active": true
+  },
+  {
+    "id": "00000000-0000-4000-8000-000000000002",
+    "email": "sam.agent@clouddesk.demo",
+    "display_name": "Sam Rivera",
+    "role": "agent",
+    "is_active": true
+  },
+  {
+    "id": "00000000-0000-4000-8000-000000000003",
+    "email": "vic.viewer@clouddesk.demo",
+    "display_name": "Vic Chen",
+    "role": "viewer",
+    "is_active": true
+  }
+]

@@ -1,0 +1,82 @@
+[
+  {
+    "id": "30000000-0000-4000-8000-000000000001",
+    "customer_email": "maya@northstar.example.test",
+    "plan_name": "enterprise",
+    "status": "active",
+    "seat_count": 250,
+    "seats_used": 218,
+    "storage_limit_bytes": 1099511627776,
+    "storage_used_bytes": 439804651110
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000002",
+    "customer_email": "elliot@redwood.example.test",
+    "plan_name": "business",
+    "status": "active",
+    "seat_count": 40,
+    "seats_used": 33,
+    "storage_limit_bytes": 219902325555,
+    "storage_used_bytes": 87960930222
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000003",
+    "customer_email": "nina@solstice.example.test",
+    "plan_name": "pro",
+    "status": "active",
+    "seat_count": 12,
+    "seats_used": 9,
+    "storage_limit_bytes": 54975581388,
+    "storage_used_bytes": 24189255811
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000004",
+    "customer_email": "owen@harbor.example.test",
+    "plan_name": "enterprise",
+    "status": "active",
+    "seat_count": 120,
+    "seats_used": 103,
+    "storage_limit_bytes": 549755813888,
+    "storage_used_bytes": 164926744166
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000005",
+    "customer_email": "priya@orbit.example.test",
+    "plan_name": "business",
+    "status": "active",
+    "seat_count": 32,
+    "seats_used": 28,
+    "storage_limit_bytes": 219902325555,
+    "storage_used_bytes": 153931627888
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000006",
+    "customer_email": "jordan@beacon.example.test",
+    "plan_name": "pro",
+    "status": "active",
+    "seat_count": 8,
+    "seats_used": 5,
+    "storage_limit_bytes": 54975581388,
+    "storage_used_bytes": 21990232555
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000007",
+    "customer_email": "avery@juniper.example.test",
+    "plan_name": "free",
+    "status": "active",
+    "seat_count": 3,
+    "seats_used": 3,
+    "storage_limit_bytes": 5368709120,
+    "storage_used_bytes": 3865470566
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000008",
+    "customer_email": "riley@atlas.example.test",
+    "plan_name": "pro",
+    "status": "active",
+    "seat_count": 15,
+    "seats_used": 14,
+    "storage_limit_bytes": 54975581388,
+    "storage_used_bytes": 54975581388
+  }
+]

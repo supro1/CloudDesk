@@ -1,0 +1,23 @@
+[
+  {
+    "id": "60000000-0000-4000-8000-000000000001",
+    "title": "Intermittent SSO authentication failures",
+    "description": "Some enterprise workspaces are seeing sign-in failures after identity-provider certificate rotations.",
+    "status": "active",
+    "severity": "high",
+    "affected_services": [
+      "authentication",
+      "single_sign_on"
+    ]
+  },
+  {
+    "id": "60000000-0000-4000-8000-000000000002",
+    "title": "Elevated API rate limiting",
+    "description": "A subset of API clients may receive 429 responses during burst traffic.",
+    "status": "investigating",
+    "severity": "medium",
+    "affected_services": [
+      "public_api"
+    ]
+  }
+]

@@ -1,0 +1,96 @@
+[
+  {
+    "id": "40000000-0000-4000-8000-000000000001",
+    "customer_email": "maya@northstar.example.test",
+    "name": "Northstar Production",
+    "slug": "northstar-production",
+    "settings": {
+      "sso_enabled": true,
+      "external_sharing": false
+    },
+    "is_active": true
+  },
+  {
+    "id": "40000000-0000-4000-8000-000000000002",
+    "customer_email": "elliot@redwood.example.test",
+    "name": "Redwood Analytics",
+    "slug": "redwood-analytics",
+    "settings": {
+      "sso_enabled": false,
+      "external_sharing": true
+    },
+    "is_active": true
+  },
+  {
+    "id": "40000000-0000-4000-8000-000000000003",
+    "customer_email": "nina@solstice.example.test",
+    "name": "Solstice Studio",
+    "slug": "solstice-studio",
+    "settings": {
+      "sso_enabled": false,
+      "external_sharing": false
+    },
+    "is_active": true
+  },
+  {
+    "id": "40000000-0000-4000-8000-000000000004",
+    "customer_email": "owen@harbor.example.test",
+    "name": "Harbor Legal",
+    "slug": "harbor-legal",
+    "settings": {
+      "sso_enabled": true,
+      "external_sharing": false
+    },
+    "is_active": true
+  },
+  {
+    "id": "40000000-0000-4000-8000-000000000005",
+    "customer_email": "owen@harbor.example.test",
+    "name": "Harbor Legacy",
+    "slug": "harbor-legacy",
+    "settings": {
+      "retention_days": 365
+    },
+    "is_active": true
+  },
+  {
+    "id": "40000000-0000-4000-8000-000000000006",
+    "customer_email": "priya@orbit.example.test",
+    "name": "Orbit Engineering",
+    "slug": "orbit-engineering",
+    "settings": {
+      "api_access": true
+    },
+    "is_active": true
+  },
+  {
+    "id": "40000000-0000-4000-8000-000000000007",
+    "customer_email": "jordan@beacon.example.test",
+    "name": "Beacon Campus",
+    "slug": "beacon-campus",
+    "settings": {
+      "external_sharing": true
+    },
+    "is_active": true
+  },
+  {
+    "id": "40000000-0000-4000-8000-000000000008",
+    "customer_email": "avery@juniper.example.test",
+    "name": "Juniper Workspace",
+    "slug": "juniper-workspace",
+    "settings": {
+      "slack_connected": false
+    },
+    "is_active": true
+  },
+  {
+    "id": "40000000-0000-4000-8000-000000000009",
+    "customer_email": "riley@atlas.example.test",
+    "name": "Atlas Retail",
+    "slug": "atlas-retail",
+    "settings": {
+      "external_sharing": true
+    },
+    "is_active": true
+  }
+]

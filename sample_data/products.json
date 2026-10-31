@@ -1,0 +1,30 @@
+[
+  {
+    "id": "50000000-0000-4000-8000-000000000001",
+    "name": "CloudDesk Teams",
+    "slug": "clouddesk-teams",
+    "description": "Shared workspaces, files, and collaboration tools for teams.",
+    "details": {
+      "availability": "all_plans"
+    }
+  },
+  {
+    "id": "50000000-0000-4000-8000-000000000002",
+    "name": "CloudDesk API",
+    "slug": "clouddesk-api",
+    "description": "Programmatic access to CloudDesk workspace and file services.",
+    "details": {
+      "availability": "business_and_enterprise",
+      "default_requests_per_minute": 120
+    }
+  },
+  {
+    "id": "50000000-0000-4000-8000-000000000003",
+    "name": "CloudDesk Connect",
+    "slug": "clouddesk-connect",
+    "description": "Integrations with supported third-party collaboration tools.",
+    "details": {
+      "availability": "pro_and_above"
+    }
+  }
+]
