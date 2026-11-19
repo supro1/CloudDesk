@@ -14,6 +14,7 @@ dependencies = [
     "langchain>=1.4.7",
     "pydantic-settings>=2.10,<3",
     "pyjwt>=2.10,<3",
+    "qdrant-client>=1.14,<2",
     "python-dotenv>=1.0",
     "pyyaml>=6,<7",
     "sqlalchemy[asyncio]>=2.0,<3",
