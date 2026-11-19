@@ -35,9 +35,13 @@ Last checked while creating this file:
 - P3-1 and P3-2 are implemented: HS256 JWT verification and role enforcement,
   plus demo login and current-profile routes that issue eight-hour,
   Supabase-compatible tokens for the seeded demo profiles.
+- P5-1 and P5-2 are implemented: knowledge article loading/chunking,
+  deterministic fake embeddings, and in-memory and Qdrant vector stores.
+- P5-2 local validation: all 95 pytest tests pass; the project Ruff target and
+  Ruff on the changed RAG modules pass. Qdrant adapter behavior was tested with
+  a fake client; no live Qdrant service was used.
 - `README.md` is only a placeholder at this point.
-- P1-1 through P1-4, P2-1 through P2-4, and P3-1 through P3-2 are implemented.
-  Broader platform builds and CI have not been run.
+- CI has not been run. Broader frontend and deployment builds have not been run.
 - Cloud credentials have not been used; nothing has been applied to a real
   cloud account.
 
@@ -49,8 +53,8 @@ validation. Do not copy planned features into the implemented/validated state.
 | Area | Status |
 |---|---|
 | Product requirements and target architecture | Specified in `CLAUDE.md`; documentation support files are being established. |
-| Application implementation | P1-1 through P1-4, P2-1 through P2-4, and P3-1 through P3-2 implemented; platform runtime remains incomplete. |
-| Local validation | 59 tests passed with pytest. Ruff passes on P3-2 files; repository-wide Ruff still reports 16 issues in four untouched files. |
+| Application implementation | P5-1 and P5-2 RAG functionality implemented; the platform runtime remains incomplete. |
+| Local validation | 95 tests pass with pytest. The project Ruff target and changed RAG modules pass. |
 | CI | Not run/confirmed. |
 | Cloud credentials and deployment | Not used; nothing deployed. |
 
