@@ -37,9 +37,13 @@ class VectorStoreService(Protocol):
 
     async def delete(self, ids: Sequence[str]) -> None: ...
 
+    async def clear(self) -> None: ...
+
     async def count(self) -> int: ...
 
     async def health(self) -> bool: ...
+
+    async def aclose(self) -> None: ...
 
 
 class InMemoryVectorStore:
@@ -91,12 +95,19 @@ class InMemoryVectorStore:
             for document_id in ids:
                 self._documents.pop(document_id, None)
 
+    async def clear(self) -> None:
+        async with self._lock:
+            self._documents.clear()
+
     async def count(self) -> int:
         async with self._lock:
             return len(self._documents)
 
     async def health(self) -> bool:
         return True
+
+    async def aclose(self) -> None:
+        return None
 
 
 class QdrantVectorStore:
@@ -220,6 +231,12 @@ class QdrantVectorStore:
             points_selector=models.PointIdsList(points=[_qdrant_id(item) for item in ids]),
         )
 
+    async def clear(self) -> None:
+        if await self.client.collection_exists(self.collection_name):
+            await self.client.delete_collection(self.collection_name)
+        self._initialized = False
+        await self.initialize()
+
     async def count(self) -> int:
         await self.initialize()
         result = await self.client.count(collection_name=self.collection_name, exact=True)
@@ -227,6 +244,9 @@ class QdrantVectorStore:
 
     async def health(self) -> bool:
         return await self.client.collection_exists(self.collection_name)
+
+    async def aclose(self) -> None:
+        await self.client.close()
 
 
 def _validated_vector(values: Sequence[float], dimensions: int) -> list[float]:

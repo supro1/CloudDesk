@@ -10,6 +10,7 @@ from backend.app.api.auth import router as auth_router
 from backend.app.api.customers import router as customers_router
 from backend.app.api.health import HealthCheck
 from backend.app.api.health import router as health_router
+from backend.app.api.knowledge import router as knowledge_router
 from backend.app.api.tickets import router as tickets_router
 from backend.app.core.config import Settings, get_settings
 from backend.app.core.database import create_tables, dispose_engine, session_factory
@@ -18,7 +19,10 @@ from backend.app.core.redis import create_redis_client
 from backend.app.middleware.audit import AuditMiddleware
 from backend.app.middleware.rate_limit import RateLimitMiddleware
 from backend.app.middleware.request_id import RequestIdMiddleware
+from backend.app.services.knowledge_service import KnowledgeService
 from backend.app.services.seed_service import bootstrap_demo_data
+from rag.embeddings import FakeEmbeddings
+from rag.vector_store import create_vector_store
 
 
 @asynccontextmanager
@@ -29,12 +33,24 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         if settings.demo_mode:
             async with session_factory() as session:
                 await bootstrap_demo_data(session, settings.sample_data_dir)
+        vector_store = await create_vector_store(settings)
+        app.state.knowledge_service = KnowledgeService(
+            vector_store,
+            FakeEmbeddings(dimensions=settings.embedding_dimensions),
+        )
         yield
     finally:
         try:
-            await dispose_engine()
+            knowledge_service: KnowledgeService | None = getattr(
+                app.state, "knowledge_service", None
+            )
+            if knowledge_service is not None:
+                await knowledge_service.close()
         finally:
-            await app.state.redis_client.aclose()
+            try:
+                await dispose_engine()
+            finally:
+                await app.state.redis_client.aclose()
 
 
 def create_app(
@@ -53,6 +69,7 @@ def create_app(
     )
     app.include_router(auth_router)
     app.include_router(customers_router)
+    app.include_router(knowledge_router)
     app.include_router(tickets_router)
     app.include_router(health_router)
 
