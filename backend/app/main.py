@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from backend.app.api.auth import router as auth_router
 from backend.app.api.health import HealthCheck
 from backend.app.api.health import router as health_router
+from backend.app.api.tickets import router as tickets_router
 from backend.app.core.config import Settings, get_settings
 from backend.app.core.database import create_tables, dispose_engine, session_factory
 from backend.app.core.logging import setup_logging
@@ -50,6 +51,7 @@ def create_app(
         readiness_checks if readiness_checks is not None else {"application": lambda: True}
     )
     app.include_router(auth_router)
+    app.include_router(tickets_router)
     app.include_router(health_router)
 
     app.add_middleware(
