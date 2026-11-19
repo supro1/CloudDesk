@@ -7,12 +7,13 @@ endif
 HOST ?= 127.0.0.1
 PORT ?= 8000
 
-.PHONY: help setup backend demo test lint
+.PHONY: help setup backend demo ingest test lint
 
 help:
 	@echo "setup   Sync dependencies and create .env from .env.example if absent"
 	@echo "backend Run the FastAPI development server"
 	@echo "demo    Start the backend; demo fixtures load on startup when DEMO_MODE=true"
+	@echo "ingest  Load and index the knowledge-base Markdown articles"
 	@echo "test    Run the offline test suite"
 	@echo "lint    Run Ruff on backend and tests"
 
@@ -26,6 +27,9 @@ backend:
 demo:
 	@echo "Demo fixtures load on startup when DEMO_MODE=true; workflow components are not ready yet."
 	@$(MAKE) backend
+
+ingest:
+	$(PYTHON) -m rag.ingest
 
 test:
 	$(PYTHON) -m pytest -q

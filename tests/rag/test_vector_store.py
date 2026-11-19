@@ -95,6 +95,11 @@ class _FakeQdrantClient:
         self.deleted = points_selector.points
         self.points = [point for point in self.points if point.id not in self.deleted]
 
+    async def delete_collection(self, collection_name: str) -> None:
+        self.collection_name = collection_name
+        self.exists = False
+        self.points = []
+
     async def count(self, collection_name: str, exact: bool) -> SimpleNamespace:
         self.collection_name = collection_name
         self.count_exact = exact
@@ -182,6 +187,10 @@ async def test_qdrant_store_creates_collection_upserts_searches_and_deletes() ->
 
     await store.delete(["login"])
     assert len(client.deleted) == 1
+    assert await store.count() == 0
+
+    await store.clear()
+    assert client.created == 2
     assert await store.count() == 0
 
 

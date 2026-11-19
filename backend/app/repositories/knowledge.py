@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.models.entities import Incident, SupportArticle
@@ -30,6 +30,14 @@ class SupportArticleRepository(BaseRepository[SupportArticle]):
         )
         result = await self.session.scalars(statement)
         return list(result.all())
+
+    async def count_published(self, *, category: TicketCategory | None = None) -> int:
+        statement = select(func.count()).select_from(SupportArticle).where(
+            SupportArticle.is_published.is_(True)
+        )
+        if category is not None:
+            statement = statement.where(SupportArticle.category == category)
+        return await self.session.scalar(statement) or 0
 
 
 class IncidentRepository(BaseRepository[Incident]):

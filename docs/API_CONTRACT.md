@@ -306,6 +306,36 @@ customers. Do not expose customer-memory notes in these endpoints.
 | `POST /api/v1/knowledge/search` | Any authenticated role | Search using `query`, optional `category`, `mode`, and `top_k`. |
 | `POST /api/v1/knowledge/reindex` | `admin` | Recreate/reindex the configured knowledge collection. |
 
+`GET /api/v1/knowledge` accepts `limit` (default `50`, range `1–100`) and
+`offset` (default `0`, non-negative), and returns published articles in the
+standard page shape. Each item contains `id`, `slug`, `title`, nullable
+`category`, `tags`, `summary`, `content`, `created_at`, and `updated_at`.
+Article IDs in evidence links are article slugs; the detail route also accepts
+the article's database ID. Unpublished articles and unknown IDs return `404`.
+
+`POST /api/v1/knowledge/search` accepts a JSON body:
+
+```json
+{
+  "query": "user locked out after MFA attempts",
+  "category": "login_issue",
+  "mode": "hybrid",
+  "top_k": 3
+}
+```
+
+`category` is optional, `mode` defaults to `hybrid` (`hybrid`, `semantic`, or
+`keyword`), and `top_k` defaults to `3` with a maximum of `20`. The response
+shape is `{"query": "...", "items": [<evidence>]}`. Empty searches return an
+empty `items` list.
+
+`POST /api/v1/knowledge/reindex` reads the Markdown files under
+`SAMPLE_DATA_DIR/knowledge_base`, upserts their article metadata and content,
+unpublishes removed source files, and replaces the configured vector
+collection. It returns
+`{"article_count": 15, "chunk_count": 42}` (counts vary as content changes).
+The operation is audited and requires the `admin` role.
+
 Evidence objects:
 
 ```json

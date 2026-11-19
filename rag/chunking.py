@@ -20,7 +20,7 @@ _ANCHOR_PATTERN = re.compile(r"[^\w-]+", re.UNICODE)
 class KnowledgeArticle:
     slug: str
     title: str
-    category: TicketCategory
+    category: TicketCategory | None
     tags: tuple[str, ...]
     summary: str
     content: str
@@ -135,7 +135,9 @@ def chunk_article(
                     metadata={
                         "article_slug": article.slug,
                         "title": article.title,
-                        "category": article.category.value,
+                        "category": (
+                            article.category.value if article.category is not None else None
+                        ),
                         "tags": list(article.tags),
                         "summary": article.summary,
                         "heading": heading,
