@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.app.api.auth import router as auth_router
+from backend.app.api.customers import router as customers_router
 from backend.app.api.health import HealthCheck
 from backend.app.api.health import router as health_router
 from backend.app.api.tickets import router as tickets_router
@@ -51,6 +52,7 @@ def create_app(
         readiness_checks if readiness_checks is not None else {"application": lambda: True}
     )
     app.include_router(auth_router)
+    app.include_router(customers_router)
     app.include_router(tickets_router)
     app.include_router(health_router)
 
