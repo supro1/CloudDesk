@@ -31,6 +31,15 @@ class WorkflowRunRepository(BaseRepository[WorkflowRun]):
         result = await self.session.scalars(statement)
         return list(result.all())
 
+    async def get_latest_for_ticket(self, ticket_id: str) -> WorkflowRun | None:
+        statement = (
+            select(WorkflowRun)
+            .where(WorkflowRun.ticket_id == ticket_id)
+            .order_by(WorkflowRun.created_at.desc(), WorkflowRun.id)
+            .limit(1)
+        )
+        return await self.session.scalar(statement)
+
 
 class WorkflowEventRepository(BaseRepository[WorkflowEvent]):
     def __init__(self, session: AsyncSession) -> None:
@@ -72,6 +81,15 @@ class ApprovalRequestRepository(BaseRepository[ApprovalRequest]):
         )
         result = await self.session.scalars(statement)
         return list(result.all())
+
+    async def get_latest_for_ticket(self, ticket_id: str) -> ApprovalRequest | None:
+        statement = (
+            select(ApprovalRequest)
+            .where(ApprovalRequest.ticket_id == ticket_id)
+            .order_by(ApprovalRequest.requested_at.desc(), ApprovalRequest.id)
+            .limit(1)
+        )
+        return await self.session.scalar(statement)
 
     async def list_pending_for_ticket(self, ticket_id: str) -> list[ApprovalRequest]:
         statement = (
