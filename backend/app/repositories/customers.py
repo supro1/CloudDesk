@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.models.entities import (
@@ -25,6 +25,41 @@ class ProfileRepository(BaseRepository[Profile]):
 class CustomerRepository(BaseRepository[Customer]):
     def __init__(self, session: AsyncSession) -> None:
         super().__init__(session, Customer)
+
+    async def list_filtered(
+        self,
+        *,
+        limit: int,
+        offset: int,
+        email: str | None = None,
+        company_name: str | None = None,
+    ) -> list[Customer]:
+        self._validate_pagination(limit, offset)
+        statement = select(Customer)
+        if email is not None:
+            statement = statement.where(Customer.email == email)
+        if company_name is not None:
+            statement = statement.where(Customer.company_name == company_name)
+        statement = (
+            statement.order_by(Customer.created_at.desc(), Customer.id)
+            .limit(limit)
+            .offset(offset)
+        )
+        result = await self.session.scalars(statement)
+        return list(result.all())
+
+    async def count_filtered(
+        self,
+        *,
+        email: str | None = None,
+        company_name: str | None = None,
+    ) -> int:
+        statement = select(func.count()).select_from(Customer)
+        if email is not None:
+            statement = statement.where(Customer.email == email)
+        if company_name is not None:
+            statement = statement.where(Customer.company_name == company_name)
+        return await self.session.scalar(statement) or 0
 
     async def list_by_email(self, email: str) -> list[Customer]:
         statement = (
