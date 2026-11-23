@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from collections.abc import Sequence
 from decimal import Decimal, InvalidOperation
 
@@ -168,6 +169,25 @@ def plan_actions(
     return actions
 
 
+def requested_refund_amount(text: str) -> str | None:
+    """Return one explicitly stated currency amount for a customer-requested refund."""
+    if not re.search(r"\b(?:refund|credit)\b", text, re.IGNORECASE):
+        return None
+    amounts = re.findall(
+        r"(?<![\w.])\$\s*((?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{1,2})?)",
+        text,
+    )
+    if len(amounts) != 1:
+        return None
+    try:
+        amount = Decimal(amounts[0].replace(",", ""))
+    except InvalidOperation:
+        return None
+    if not amount.is_finite() or amount <= 0:
+        return None
+    return str(amount)
+
+
 def _ground_response(
     reply: str,
     diagnosis: Diagnosis,
@@ -187,4 +207,4 @@ def _ground_response(
     return "\n\n".join(sections)
 
 
-__all__ = ["ResolutionAgent", "plan_actions"]
+__all__ = ["ResolutionAgent", "plan_actions", "requested_refund_amount"]

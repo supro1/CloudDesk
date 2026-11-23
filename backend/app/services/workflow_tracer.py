@@ -7,6 +7,7 @@ from decimal import Decimal
 from time import perf_counter
 from typing import Any
 
+from langgraph.errors import GraphBubbleUp
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from backend.app.core.observability import (
@@ -43,6 +44,14 @@ class WorkflowTracer:
         token = bind_node_observation(observation)
         try:
             yield observation
+        except GraphBubbleUp:
+            await self.record(
+                event_type="node_completed",
+                node_name=name,
+                payload={"status": "paused"},
+                duration_ms=round((perf_counter() - started_at) * 1000),
+            )
+            raise
         except Exception as error:
             await self.record(
                 event_type="error",

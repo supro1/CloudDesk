@@ -163,11 +163,11 @@ Sub-tasks in the same phase that do not share files can be open at the same time
 
 | Task | Branch | Status |
 |------|--------|--------|
-| P11-1 · Human approval interrupt | `feature/workflow-human-approval` | Pending ❌ |
-| P11-2 · Approval decide and resume API | `feature/api-approvals-resume` | Pending ❌ |
-| P11-3 · Escalation routing | `feature/workflow-escalation-routing` | Pending ❌ |
-| P11-4 · Execute resolution on the shared tool path | `feature/workflow-execute-resolution` | Pending ❌ |
-| P11-5 · Demo script for CD-1002 and CD-1005 | `feature/demo-approval-escalation` | Pending ❌ |
+| P11-1 · Human approval interrupt | `feature/workflow-human-approval` | Completed ✅ |
+| P11-2 · Approval decide and resume API | `feature/api-approvals-resume` | Completed ✅ |
+| P11-3 · Escalation routing | `feature/workflow-escalation-routing` | Completed ✅ |
+| P11-4 · Execute resolution on the shared tool path | `feature/workflow-execute-resolution` | Completed ✅ |
+| P11-5 · Demo script for CD-1002 and CD-1005 | `feature/demo-approval-escalation` | Completed ✅ |
 
 ---
 
@@ -269,8 +269,8 @@ Phases 4, 5, 6, and 7 start together once Phase 2 (and Phase 3, for Phase 4 only
 | 8 | Memory | 3 | 3 |
 | 9 | Specialist agents | 8 | 8 |
 | 10 | Workflow graph and trace | 6 | 6 |
-| 11 | Approval and escalation | 5 | 0 |
+| 11 | Approval and escalation | 5 | 5 |
 | 12 | Console shell | 4 | 0 |
 | 13 | Ticket workflow screen | 4 | 0 |
 | 14 | Evaluation and delivery | 5 | 0 |
-| **Total** | | **62** | **44** |
+| **Total** | | **62** | **49** |

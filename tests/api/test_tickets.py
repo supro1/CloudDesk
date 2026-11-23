@@ -15,6 +15,11 @@ from backend.app.models.entities import (
     Profile,
     WorkflowRun,
 )
+from backend.app.repositories import (
+    EscalationRepository,
+    ResolutionActionRepository,
+    WorkflowRunRepository,
+)
 
 AGENT_ID = "00000000-0000-4000-8000-000000000002"
 VIEWER_ID = "00000000-0000-4000-8000-000000000003"
@@ -392,3 +397,154 @@ def test_workflow_routes_enforce_agent_and_viewer_permissions(
 
     assert forbidden.status_code == 403
     assert missing.status_code == 404
+
+
+async def test_refund_workflow_pauses_for_approval_then_uses_registry(
+    ticket_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
+) -> None:
+    client, session_maker = ticket_client
+    agent_headers = _headers(client, "sam.agent@clouddesk.demo")
+    viewer_headers = _headers(client, "vic.viewer@clouddesk.demo")
+    created = _create_ticket(
+        client,
+        agent_headers,
+        subject="Refund review for unused seats",
+        body="Please review a $12.50 refund for the unused seats.",
+    )
+
+    started = client.post(
+        f"/api/v1/tickets/{created['id']}/run",
+        headers=agent_headers,
+    )
+    workflow = client.get(
+        f"/api/v1/tickets/{created['id']}/workflow",
+        headers=viewer_headers,
+    )
+    approvals = client.get("/api/v1/approvals", headers=agent_headers)
+    approval = approvals.json()["items"][0]
+    forbidden = client.post(
+        f"/api/v1/approvals/{approval['id']}/approve",
+        headers=viewer_headers,
+    )
+    approved = client.post(
+        f"/api/v1/approvals/{approval['id']}/approve",
+        headers=agent_headers,
+        json={"reason": "Invoice amount checked."},
+    )
+
+    assert started.status_code == 202
+    assert workflow.json()["status"] == "paused"
+    assert workflow.json()["current_node"] == "human_approval"
+    assert workflow.json()["risk_level"] == "high"
+    assert approvals.status_code == 200
+    assert approval["action"] == "create_refund_request"
+    assert approval["status"] == "pending"
+    assert forbidden.status_code == 403
+    escalation_page = client.get(
+        "/api/v1/escalations",
+        headers=viewer_headers,
+        params={"team": "billing", "ticket_id": created["id"]},
+    )
+    assert escalation_page.status_code == 200
+    assert escalation_page.json()["total"] == 0
+    assert approved.status_code == 200, approved.text
+    assert approved.json()["approval"]["status"] == "approved"
+    assert approved.json()["approval"]["decided_by"] == AGENT_ID
+    assert approved.json()["workflow_status"] == "completed"
+
+    async with session_maker() as session:
+        run = await WorkflowRunRepository(session).get(str(started.json()["workflow_id"]))
+        assert run is not None
+        actions = await ResolutionActionRepository(session).list_for_run(run.id)
+    refund_action = next(action for action in actions if action.action_type == "create_refund_request")
+    assert refund_action.status == "completed"
+    assert refund_action.approval_required is True
+    assert refund_action.result["amount"] == "12.50"
+    duplicate_decision = client.post(
+        f"/api/v1/approvals/{approval['id']}/approve",
+        headers=agent_headers,
+    )
+    assert duplicate_decision.status_code == 409
+
+
+async def test_rejected_approval_routes_to_billing_escalation_without_action(
+    ticket_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
+) -> None:
+    client, session_maker = ticket_client
+    agent_headers = _headers(client, "sam.agent@clouddesk.demo")
+    created = _create_ticket(
+        client,
+        agent_headers,
+        subject="Refund review",
+        body="Please review a $12.50 refund.",
+    )
+    started = client.post(
+        f"/api/v1/tickets/{created['id']}/run",
+        headers=agent_headers,
+    )
+    approvals = client.get("/api/v1/approvals", headers=agent_headers).json()["items"]
+
+    rejected = client.post(
+        f"/api/v1/approvals/{approvals[0]['id']}/reject",
+        headers=agent_headers,
+        json={"reason": "The invoice evidence is incomplete."},
+    )
+    workflow = client.get(
+        f"/api/v1/tickets/{created['id']}/workflow",
+        headers=agent_headers,
+    )
+    detail = client.get(
+        f"/api/v1/tickets/{created['id']}",
+        headers=agent_headers,
+    )
+
+    assert started.status_code == 202
+    assert rejected.status_code == 200, rejected.text
+    assert rejected.json()["approval"]["status"] == "rejected"
+    assert rejected.json()["workflow_status"] == "completed"
+    assert workflow.json()["completed_nodes"][-2:] == ["ticket_summary", "memory_update"]
+    assert detail.json()["status"] == "escalated"
+    async with session_maker() as session:
+        escalations = await EscalationRepository(session).list_for_ticket(
+            str(created["id"])
+        )
+        runs = await WorkflowRunRepository(session).list_for_ticket(str(created["id"]))
+        actions = await ResolutionActionRepository(session).list_for_run(runs[0].id)
+    assert escalations[0].team == "billing"
+    assert actions == []
+
+
+async def test_security_ticket_routes_to_named_team_and_updates_ticket(
+    ticket_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
+) -> None:
+    client, session_maker = ticket_client
+    agent_headers = _headers(client, "sam.agent@clouddesk.demo")
+    created = _create_ticket(
+        client,
+        agent_headers,
+        subject="Suspicious logins, possible breach",
+        body="We see suspicious logins from unknown locations.",
+    )
+
+    started = client.post(
+        f"/api/v1/tickets/{created['id']}/run",
+        headers=agent_headers,
+    )
+    workflow = client.get(
+        f"/api/v1/tickets/{created['id']}/workflow",
+        headers=agent_headers,
+    )
+    async with session_maker() as session:
+        escalations = await EscalationRepository(session).list_for_ticket(
+            str(created["id"])
+        )
+
+    assert started.status_code == 202
+    assert workflow.json()["status"] == "completed"
+    assert workflow.json()["completed_nodes"][-3:] == [
+        "escalation",
+        "ticket_summary",
+        "memory_update",
+    ]
+    assert len(escalations) == 1
+    assert escalations[0].team == "security"

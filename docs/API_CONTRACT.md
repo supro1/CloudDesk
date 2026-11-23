@@ -226,7 +226,8 @@ and insufficient role returns `403`.
 `GET /api/v1/tickets/{ticket_id}/workflow` returns the latest workflow's
 status and a safe summary of its progress: current/completed node names,
 classification, severity, cited evidence, diagnosis, customer-reply preview,
-risk level, and token counts. It does not expose raw prompts, internal notes,
+risk level, token counts, and a generic error notice when a planned action
+does not complete. It does not expose raw prompts, internal notes,
 tool arguments, or ticket bodies. If no workflow exists for the ticket, it
 returns `404`.
 
@@ -273,19 +274,36 @@ Approval object:
   "status": "pending",
   "requested_at": "2026-01-01T00:00:00Z",
   "decided_at": null,
-  "decided_by": null
+  "decided_by": null,
+  "reason": null
 }
 ```
 
 | Method and path | Role | Purpose |
 |---|---|---|
-| `GET /api/v1/approvals` | `agent`+ | List approval requests visible to the agent. |
+| `GET /api/v1/approvals` | `agent`+ | List approval requests, newest first; accepts `limit` (1–100) and `offset`. |
 | `POST /api/v1/approvals/{approval_id}/approve` | `agent`+ | Record approval and resume the paused workflow. |
 | `POST /api/v1/approvals/{approval_id}/reject` | `agent`+ | Record rejection and route through the configured safe path. |
 
-Approve/reject requests may include a `reason`. A decision is durable and
-auditable; clients cannot directly execute the action by sending an `approved`
-flag to a tool endpoint.
+Approve/reject requests accept an optional `{"reason": "..."}` body. The
+decision response contains the updated approval and resulting workflow status.
+A decision is durable and auditable; clients cannot directly execute the
+action by sending an `approved` flag to a tool endpoint. Missing approvals
+return `404`; already-decided approvals and workflows that are not paused
+return `409`. Only the currently interrupted action is presented at a time;
+after it is approved, the graph may request approval for its next action.
+
+An approval-required action pauses the LangGraph run using its saved
+checkpoint. The ticket status becomes `waiting_on_approval`; approval resumes
+the graph through the same `ToolRegistry` path used by non-consequential
+actions. Rejection does not execute the planned action; it creates a named-team
+escalation and marks the ticket `escalated`.
+
+The approval list response uses the standard page shape:
+`{"items": [<approval>], "total": 1, "limit": 50, "offset": 0}`.
+The decision response shape is:
+`{"approval": <approval>, "workflow_status": "completed"}` (the workflow can
+remain `paused` if another action needs approval).
 
 ## Customers
 
@@ -394,11 +412,15 @@ must retain article citations.
 
 | Method and path | Role | Purpose |
 |---|---|---|
-| `GET /api/v1/escalations` | Any authenticated role | List escalations with supported filters and pagination. |
+| `GET /api/v1/escalations` | Any authenticated role | List escalations with optional `status`, `team`, and `ticket_id` filters and pagination. |
 | `GET /api/v1/escalations/{escalation_id}` | Any authenticated role | Return escalation reason, assigned team, status, and linked ticket. |
 
 Policy cases must be routed to a named team according to deterministic
 escalation rules. Policy takes precedence over model-generated judgement.
+List responses use the standard page shape and are ordered newest first.
+The escalation record identifies the ticket, workflow run, team, reason,
+status, and creation/resolution timestamps. Security, data-loss, payment
+dispute, deletion, and legal cases use their configured specialist teams.
 
 ## Agents and workflow metadata
 

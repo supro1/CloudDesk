@@ -45,6 +45,12 @@ class SupportState(TypedDict, total=False):
     knowledge: KnowledgeResult
     diagnosis: Diagnosis
     resolution_plan: ResolutionPlan
+    approval_action_indices: list[int]
+    approved_action_indices: list[int]
+    approval_decision: Literal["approved", "rejected"]
+    approval_reason: str | None
+    resolution_results: list[dict[str, object]]
+    escalation_result: dict[str, object]
     ticket_summary: TicketSummary
     escalation_decision: EscalationDecision
     category: TicketCategory

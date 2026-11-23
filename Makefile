@@ -12,7 +12,7 @@ PORT ?= 8000
 help:
 	@echo "setup   Sync dependencies and create .env from .env.example if absent"
 	@echo "backend Run the FastAPI development server"
-	@echo "demo    Start the backend; demo fixtures load on startup when DEMO_MODE=true"
+	@echo "demo    Run the approval or security escalation demo (TICKET=CD-1002|CD-1005)"
 	@echo "ingest  Load and index the knowledge-base Markdown articles"
 	@echo "test    Run the offline test suite"
 	@echo "lint    Run Ruff on backend and tests"
@@ -25,8 +25,7 @@ backend:
 	$(PYTHON) -m uvicorn backend.app.main:app --reload --host $(HOST) --port $(PORT)
 
 demo:
-	@echo "Demo fixtures load on startup when DEMO_MODE=true; workflow components are not ready yet."
-	@$(MAKE) backend
+	$(PYTHON) -m scripts.demo --ticket $(if $(TICKET),$(TICKET),CD-1002)
 
 ingest:
 	$(PYTHON) -m rag.ingest

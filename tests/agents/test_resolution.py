@@ -12,6 +12,7 @@ from backend.app.schemas.workflow import (
     Evidence,
     ResolutionDraft,
 )
+from agents.specialists.resolution import requested_refund_amount
 
 
 def _resolution_inputs() -> tuple[Classification, Diagnosis, list[Evidence]]:
@@ -120,3 +121,9 @@ async def test_resolution_requires_customer_and_ticket_for_refund_planning() -> 
             evidence,
             refund_amount="10.00",
         )
+
+
+def test_requested_refund_amount_requires_one_explicit_currency_amount() -> None:
+    assert requested_refund_amount("Please review a $1,250.00 refund.") == "1250.00"
+    assert requested_refund_amount("Please refund $10 or $20, whichever is right.") is None
+    assert requested_refund_amount("Refund the unused seats.") is None
