@@ -550,7 +550,7 @@ this file. Stage 17 is optional and is not a core exit criterion.
 | 3 | Identity and request guards | not started |
 | 4 | Support API | not started |
 | 5 | Knowledge pipeline | not started |
-| 6 | Tools and policy | not started |
+| 6 | Tools and policy | complete |
 | 7 | Rules and guardrails | not started |
 | 8 | Specialist agents | not started |
 | 9 | Workflow graph and trace | not started |
