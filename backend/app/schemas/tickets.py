@@ -56,6 +56,35 @@ class TicketPatchRequest(BaseModel):
         return self
 
 
+class TicketReplyRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    body: str = Field(min_length=1, max_length=4000)
+
+    @field_validator("body")
+    @classmethod
+    def reject_blank_body(cls, value: str) -> str:
+        normalized = value.strip()
+        if not normalized:
+            raise ValueError("body must not be blank")
+        return normalized
+
+
+class TicketEscalateRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    team: str = Field(min_length=1, max_length=120)
+    reason: str = Field(min_length=1, max_length=1000)
+
+    @field_validator("team", "reason")
+    @classmethod
+    def reject_blank_text(cls, value: str) -> str:
+        normalized = value.strip()
+        if not normalized:
+            raise ValueError("must not be blank")
+        return normalized
+
+
 class TicketResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -122,3 +151,22 @@ class TicketPageResponse(BaseModel):
     total: int
     limit: int
     offset: int
+
+
+__all__ = [
+    "TicketApprovalSummary",
+    "TicketCategory",
+    "TicketChannel",
+    "TicketCreateRequest",
+    "TicketCustomerSummary",
+    "TicketDetailResponse",
+    "TicketEscalateRequest",
+    "TicketMessageResponse",
+    "TicketPageResponse",
+    "TicketPatchRequest",
+    "TicketReplyRequest",
+    "TicketResponse",
+    "TicketSeverity",
+    "TicketStatus",
+    "TicketWorkflowSummary",
+]

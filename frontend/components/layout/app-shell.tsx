@@ -56,7 +56,7 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
         </nav>
         <div className="sidebar-foot">
           {user.role === "viewer" ? "Read-only access" : "Support team access"}
-          <br />Phase 12 console
+          <br />Ticket workflow console
         </div>
       </aside>
       <div className="main-column">

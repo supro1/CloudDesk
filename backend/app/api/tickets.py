@@ -18,19 +18,27 @@ from backend.app.repositories import (
     WorkflowRunRepository,
 )
 from backend.app.schemas.common import TicketCategory
+from backend.app.schemas.escalations import EscalationResponse
 from backend.app.schemas.tickets import (
     TicketApprovalSummary,
     TicketChannel,
     TicketCreateRequest,
     TicketCustomerSummary,
     TicketDetailResponse,
+    TicketEscalateRequest,
     TicketMessageResponse,
     TicketPageResponse,
     TicketPatchRequest,
+    TicketReplyRequest,
     TicketResponse,
     TicketSeverity,
     TicketStatus,
     TicketWorkflowSummary,
+)
+from backend.app.services.ticket_actions import (
+    CustomerReplyRejectedError,
+    TicketActionNotFoundError,
+    TicketActionService,
 )
 
 router = APIRouter(prefix="/api/v1/tickets", tags=["tickets"])
@@ -204,3 +212,68 @@ async def update_ticket(
         raise HTTPException(status_code=404, detail="Ticket not found")
     await session.commit()
     return _ticket_response(ticket)
+
+
+@router.post("/{ticket_id}/reply", response_model=TicketMessageResponse)
+async def reply_to_ticket(
+    ticket_id: str,
+    body: TicketReplyRequest,
+    session: Annotated[AsyncSession, Depends(get_session)],
+    current_user: Annotated[AuthenticatedUser, Depends(require_role("agent"))],
+) -> TicketMessageResponse:
+    try:
+        message = await TicketActionService(session).record_reply(
+            ticket_id,
+            body.body,
+            sender_name=current_user.email,
+        )
+    except TicketActionNotFoundError as error:
+        raise HTTPException(status_code=404, detail=str(error)) from error
+    except CustomerReplyRejectedError as error:
+        raise HTTPException(
+            status_code=422,
+            detail=f"{error} Issues: {', '.join(error.issues)}",
+        ) from error
+    return TicketMessageResponse.model_validate(message)
+
+
+@router.post("/{ticket_id}/request-info", response_model=TicketMessageResponse)
+async def request_ticket_information(
+    ticket_id: str,
+    body: TicketReplyRequest,
+    session: Annotated[AsyncSession, Depends(get_session)],
+    current_user: Annotated[AuthenticatedUser, Depends(require_role("agent"))],
+) -> TicketMessageResponse:
+    try:
+        message = await TicketActionService(session).record_reply(
+            ticket_id,
+            body.body,
+            sender_name=current_user.email,
+            request_customer_information=True,
+        )
+    except TicketActionNotFoundError as error:
+        raise HTTPException(status_code=404, detail=str(error)) from error
+    except CustomerReplyRejectedError as error:
+        raise HTTPException(
+            status_code=422,
+            detail=f"{error} Issues: {', '.join(error.issues)}",
+        ) from error
+    return TicketMessageResponse.model_validate(message)
+
+
+@router.post("/{ticket_id}/escalate", response_model=EscalationResponse)
+async def escalate_ticket(
+    ticket_id: str,
+    body: TicketEscalateRequest,
+    session: Annotated[AsyncSession, Depends(get_session)],
+    _current_user: Annotated[AuthenticatedUser, Depends(require_role("agent"))],
+) -> EscalationResponse:
+    try:
+        escalation = await TicketActionService(session).escalate(
+            ticket_id,
+            team=body.team,
+            reason=body.reason,
+        )
+    except TicketActionNotFoundError as error:
+        raise HTTPException(status_code=404, detail=str(error)) from error
+    return EscalationResponse.model_validate(escalation)
