@@ -1,0 +1,5 @@
+bucket         = "replace-with-organization-state-bucket"
+key            = "clouddesk/dev/terraform.tfstate"
+region         = "us-east-1"
+dynamodb_table = "replace-with-state-lock-table"
+encrypt        = true

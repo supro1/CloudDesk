@@ -1,0 +1,4 @@
+resource_group_name  = "replace-with-state-resource-group"
+storage_account_name = "replacewithstatestorage"
+container_name       = "terraform-state"
+key                  = "clouddesk/dev/terraform.tfstate"

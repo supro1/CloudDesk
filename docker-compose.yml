@@ -1,0 +1,151 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      DEMO_MODE: "true"
+      ENVIRONMENT: development
+      CORS_ORIGINS: '["http://localhost:3000"]'
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env before starting Compose}
+      DATABASE_URL: sqlite+aiosqlite:////app/data/support.db
+      CHECKPOINT_DB_PATH: /app/data/checkpoints.db
+      REDIS_URL: redis://redis:6379/0
+      USE_FAKE_REDIS: "false"
+      LLM_PROVIDER: fake
+      LLM_API_KEY: ""
+      EMBEDDING_PROVIDER: fake
+      EMBEDDING_MODEL: fake
+      EMBEDDING_DIMENSIONS: "384"
+      VECTOR_STORE: qdrant
+      QDRANT_URL: http://qdrant:6333
+      QDRANT_COLLECTION: clouddesk_knowledge
+      APPROVAL_REQUIRED_FOR_REFUNDS: "true"
+      MAX_REFUND_WITHOUT_APPROVAL: "0"
+      TOOL_TIMEOUT_SECONDS: "30"
+      RATE_LIMIT_PER_MINUTE: "120"
+      SAMPLE_DATA_DIR: /app/sample_data
+      LANGCHAIN_TRACING_V2: "false"
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - backend-data:/app/data
+    networks:
+      - edge
+      - data
+    depends_on:
+      redis:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "from urllib.request import urlopen; urlopen('http://127.0.0.1:8000/health/live', timeout=2).read()"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  knowledge-ingest:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    command: ["python", "-m", "rag.ingest"]
+    environment:
+      DEMO_MODE: "false"
+      DATABASE_URL: sqlite+aiosqlite:////app/data/support.db
+      REDIS_URL: redis://redis:6379/0
+      USE_FAKE_REDIS: "false"
+      EMBEDDING_PROVIDER: fake
+      EMBEDDING_MODEL: fake
+      EMBEDDING_DIMENSIONS: "384"
+      VECTOR_STORE: qdrant
+      QDRANT_URL: http://qdrant:6333
+      QDRANT_COLLECTION: clouddesk_knowledge
+      SAMPLE_DATA_DIR: /app/sample_data
+    volumes:
+      - backend-data:/app/data
+    networks:
+      - data
+    depends_on:
+      backend:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+    restart: "no"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    ports:
+      - "127.0.0.1:3000:3000"
+    networks:
+      - edge
+    depends_on:
+      knowledge-ingest:
+        condition: service_completed_successfully
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/api/health').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    networks:
+      - data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  qdrant:
+    build:
+      context: deployment/docker/qdrant
+      dockerfile: Dockerfile
+    volumes:
+      - qdrant-data:/qdrant/storage
+    networks:
+      - data
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - -fsS
+        - http://127.0.0.1:6333/readyz
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+networks:
+  edge:
+    driver: bridge
+  data:
+    driver: bridge
+
+volumes:
+  backend-data:
+  redis-data:
+  qdrant-data:

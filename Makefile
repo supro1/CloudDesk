@@ -7,7 +7,7 @@ endif
 HOST ?= 127.0.0.1
 PORT ?= 8000
 
-.PHONY: help setup backend demo ingest test lint
+.PHONY: help setup backend demo ingest test lint terraform-validate
 
 help:
 	@echo "setup   Sync dependencies and create .env from .env.example if absent"
@@ -16,6 +16,7 @@ help:
 	@echo "ingest  Load and index the knowledge-base Markdown articles"
 	@echo "test    Run the offline test suite"
 	@echo "lint    Run Ruff on backend and tests"
+	@echo "terraform-validate Format and validate the AWS, Azure, and GCP Terraform roots"
 
 setup:
 	uv sync --group dev
@@ -35,3 +36,12 @@ test:
 
 lint:
 	$(PYTHON) -m ruff check --isolated --select E4,E7,E9,F backend tests
+
+terraform-validate:
+	terraform fmt -check -recursive deployment
+	terraform -chdir=deployment/aws init -backend=false -input=false
+	terraform -chdir=deployment/aws validate
+	terraform -chdir=deployment/azure init -backend=false -input=false
+	terraform -chdir=deployment/azure validate
+	terraform -chdir=deployment/gcp init -backend=false -input=false
+	terraform -chdir=deployment/gcp validate

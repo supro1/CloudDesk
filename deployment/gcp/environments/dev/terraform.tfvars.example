@@ -1,0 +1,5 @@
+project_id    = "replace-with-gcp-project-id"
+region        = "us-central1"
+repository_id = "clouddesk"
+project_name  = "clouddesk"
+environment   = "dev"
