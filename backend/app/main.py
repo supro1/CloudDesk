@@ -9,8 +9,10 @@ from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
 from agents.checkpointer import open_checkpointer
 from agents.graph import create_support_graph
+from backend.app.api.approvals import router as approvals_router
 from backend.app.api.auth import router as auth_router
 from backend.app.api.customers import router as customers_router
+from backend.app.api.escalations import router as escalations_router
 from backend.app.api.health import HealthCheck
 from backend.app.api.health import router as health_router
 from backend.app.api.knowledge import router as knowledge_router
@@ -119,7 +121,9 @@ def create_app(
         readiness_checks if readiness_checks is not None else {"application": lambda: True}
     )
     app.include_router(auth_router)
+    app.include_router(approvals_router)
     app.include_router(customers_router)
+    app.include_router(escalations_router)
     app.include_router(knowledge_router)
     app.include_router(tickets_router)
     app.include_router(workflow_router)

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from sqlalchemy import select
+from datetime import datetime
+
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.models.entities import (
@@ -82,6 +84,17 @@ class ApprovalRequestRepository(BaseRepository[ApprovalRequest]):
         result = await self.session.scalars(statement)
         return list(result.all())
 
+    async def list_all(self, *, limit: int = 100, offset: int = 0) -> list[ApprovalRequest]:
+        self._validate_pagination(limit, offset)
+        statement = (
+            select(ApprovalRequest)
+            .order_by(ApprovalRequest.requested_at.desc(), ApprovalRequest.id)
+            .limit(limit)
+            .offset(offset)
+        )
+        result = await self.session.scalars(statement)
+        return list(result.all())
+
     async def get_latest_for_ticket(self, ticket_id: str) -> ApprovalRequest | None:
         statement = (
             select(ApprovalRequest)
@@ -102,6 +115,31 @@ class ApprovalRequestRepository(BaseRepository[ApprovalRequest]):
         )
         result = await self.session.scalars(statement)
         return list(result.all())
+
+    async def decide_if_pending(
+        self,
+        approval_id: str,
+        *,
+        status: str,
+        decided_at: datetime,
+        decided_by_id: str,
+        reason: str | None,
+    ) -> bool:
+        statement = (
+            update(ApprovalRequest)
+            .where(
+                ApprovalRequest.id == approval_id,
+                ApprovalRequest.status == "pending",
+            )
+            .values(
+                status=status,
+                decided_at=decided_at,
+                decided_by_id=decided_by_id,
+                reason=reason,
+            )
+        )
+        result = await self.session.execute(statement)
+        return result.rowcount == 1
 
 
 class EscalationRepository(BaseRepository[Escalation]):
@@ -125,6 +163,47 @@ class EscalationRepository(BaseRepository[Escalation]):
         )
         result = await self.session.scalars(statement)
         return list(result.all())
+
+    async def list_filtered(
+        self,
+        *,
+        limit: int,
+        offset: int,
+        status: str | None = None,
+        team: str | None = None,
+        ticket_id: str | None = None,
+    ) -> list[Escalation]:
+        self._validate_pagination(limit, offset)
+        statement = select(Escalation)
+        if status is not None:
+            statement = statement.where(Escalation.status == status)
+        if team is not None:
+            statement = statement.where(Escalation.team == team)
+        if ticket_id is not None:
+            statement = statement.where(Escalation.ticket_id == ticket_id)
+        statement = (
+            statement.order_by(Escalation.created_at.desc(), Escalation.id)
+            .limit(limit)
+            .offset(offset)
+        )
+        result = await self.session.scalars(statement)
+        return list(result.all())
+
+    async def count_filtered(
+        self,
+        *,
+        status: str | None = None,
+        team: str | None = None,
+        ticket_id: str | None = None,
+    ) -> int:
+        statement = select(func.count()).select_from(Escalation)
+        if status is not None:
+            statement = statement.where(Escalation.status == status)
+        if team is not None:
+            statement = statement.where(Escalation.team == team)
+        if ticket_id is not None:
+            statement = statement.where(Escalation.ticket_id == ticket_id)
+        return await self.session.scalar(statement) or 0
 
 
 class CustomerMemoryRepository(BaseRepository[CustomerMemory]):

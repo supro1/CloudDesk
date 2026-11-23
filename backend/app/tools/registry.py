@@ -66,6 +66,13 @@ class ToolRegistry:
     def tool_names(self) -> tuple[str, ...]:
         return tuple(sorted(self._tools))
 
+    def requires_approval(
+        self,
+        name: str,
+        arguments: Mapping[str, Any],
+    ) -> bool:
+        return self._policy.evaluate(name, arguments).approval_required
+
     async def execute(
         self,
         name: str,
