@@ -40,8 +40,16 @@ Last checked while creating this file:
 - P5-2 local validation: all 95 pytest tests pass; the project Ruff target and
   Ruff on the changed RAG modules pass. Qdrant adapter behavior was tested with
   a fake client; no live Qdrant service was used.
+- P6-1 through P6-4 are implemented: tool registry and policy, repository-backed
+  read tools, approval-gated refund and workspace-reset tools, and mock-only
+  billing/workspace/status integrations. The registry is initialized with the
+  application; no public tool-execution route or real integration is present.
+- Phase 6 local validation: all 134 pytest tests pass, Ruff passes for
+  `backend`, `tests`, and `integrations`, and Pylance reports no diagnostics in
+  the new tool and integration modules. Approval persistence and the human
+  decision/resume workflow remain in the later approval phase.
 - `README.md` is only a placeholder at this point.
-- CI has not been run. Broader frontend and deployment builds have not been run.
+- CI has not been run. Frontend and deployment builds have not been run.
 - Cloud credentials have not been used; nothing has been applied to a real
   cloud account.
 
@@ -53,8 +61,8 @@ validation. Do not copy planned features into the implemented/validated state.
 | Area | Status |
 |---|---|
 | Product requirements and target architecture | Specified in `CLAUDE.md`; documentation support files are being established. |
-| Application implementation | P5-1 and P5-2 RAG functionality implemented; the platform runtime remains incomplete. |
-| Local validation | 95 tests pass with pytest. The project Ruff target and changed RAG modules pass. |
+| Application implementation | P6-1 through P6-4 are implemented; approval persistence, workflow agents, frontend, and deployment remain incomplete. |
+| Local validation | 134 tests pass with pytest. Ruff passes for `backend`, `tests`, and `integrations`. |
 | CI | Not run/confirmed. |
 | Cloud credentials and deployment | Not used; nothing deployed. |
 

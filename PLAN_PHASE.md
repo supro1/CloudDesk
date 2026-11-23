@@ -204,5 +204,5 @@ changing implementation.
 
 ## Status
 
-All phases are planned, not complete. The current repository status is recorded
-in [`MEMORY.md`](./MEMORY.md); task-level checkboxes remain in [`TASKS.md`](./TASKS.md).
+The phases define acceptance plans; implementation status is tracked separately
+in [`MEMORY.md`](./MEMORY.md) and task-level checkboxes in [`TASKS.md`](./TASKS.md).

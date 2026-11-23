@@ -21,8 +21,10 @@ from backend.app.middleware.rate_limit import RateLimitMiddleware
 from backend.app.middleware.request_id import RequestIdMiddleware
 from backend.app.services.knowledge_service import KnowledgeService
 from backend.app.services.seed_service import bootstrap_demo_data
+from backend.app.tools.factory import create_support_tool_registry
 from rag.embeddings import FakeEmbeddings
 from rag.vector_store import create_vector_store
+from integrations import create_mock_integrations
 
 
 @asynccontextmanager
@@ -37,6 +39,13 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         app.state.knowledge_service = KnowledgeService(
             vector_store,
             FakeEmbeddings(dimensions=settings.embedding_dimensions),
+        )
+        app.state.integrations = create_mock_integrations()
+        app.state.tool_registry = create_support_tool_registry(
+            session_factory,
+            app.state.knowledge_service,
+            integrations=app.state.integrations,
+            settings=settings,
         )
         yield
     finally:
