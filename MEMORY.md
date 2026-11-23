@@ -24,7 +24,8 @@ status change. Do not treat plans as implementation evidence.
 
 ## Current repository status
 
-Last checked while creating this file:
+Last checked after completing tracker Phase 8 (Memory), which maps to
+`PLAN_PHASE.md` Phase 11:
 
 - The working tree contains the starter package under `src/project_1/` and
   backend core settings and JSON logging modules, health routes, and request-ID
@@ -52,10 +53,15 @@ Last checked while creating this file:
   helpers, injection scanning and escaped untrusted-text wrapping, customer
   output validation, and reusable secret scrubbing for future memory callers.
   These helpers are not yet wired into ticket APIs or a workflow graph.
-- Phase 7 local validation: all 160 pytest tests pass; Ruff passes for
-  `backend`, `tests`, `integrations`, `agents`, and `memory`; Pylance reports no
-  diagnostics in the changed Python modules. No Docker, cloud, or workflow
-  integration was added.
+- P8-1 through P8-3 are implemented: expiring Redis/fakeredis memory,
+  customer-scoped SQL note recall and de-duplication, and checked resolution
+  recording with secret scrubbing and prohibited-text filtering. Workflow
+  nodes do not call the memory facades yet.
+- Phase 8 focused validation: all 6 tests in `tests/unit/test_memory.py` pass,
+  the full offline suite passes with 166 tests, and Ruff passes on the changed
+  Python modules.
+- The `.gitignore` already excludes Python caches, pytest cache, and local
+  database files; Phase 8 required no ignore-rule changes.
 - `README.md` is only a placeholder at this point.
 - CI has not been run. Frontend and deployment builds have not been run.
 - Cloud credentials have not been used; nothing has been applied to a real
@@ -69,8 +75,8 @@ validation. Do not copy planned features into the implemented/validated state.
 | Area | Status |
 |---|---|
 | Product requirements and target architecture | Specified in `CLAUDE.md`; documentation support files are being established. |
-| Application implementation | P7-1 through P7-4 are implemented as tested helper modules but are not workflow-integrated; specialist agents, workflow, frontend, and deployment remain incomplete. |
-| Local validation | 160 tests pass with pytest. Ruff passes for `backend`, `tests`, `integrations`, `agents`, and `memory`. |
+| Application implementation | P7-1 through P7-4 and P8-1 through P8-3 are implemented as tested helpers/services but are not workflow-integrated; specialist agents, workflow, frontend, and deployment remain incomplete. |
+| Local validation | All 6 focused Phase 8 memory tests pass; the full offline suite passes with 166 tests. Ruff passes on the changed Phase 8 Python modules. |
 | CI | Not run/confirmed. |
 | Cloud credentials and deployment | Not used; nothing deployed. |
 

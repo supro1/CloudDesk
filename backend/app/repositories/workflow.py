@@ -137,8 +137,21 @@ class CustomerMemoryRepository(BaseRepository[CustomerMemory]):
         statement = (
             select(CustomerMemory)
             .where(CustomerMemory.customer_id == customer_id)
-            .order_by(CustomerMemory.created_at.desc())
+            .order_by(CustomerMemory.created_at.desc(), CustomerMemory.id)
             .limit(limit)
         )
         result = await self.session.scalars(statement)
         return list(result.all())
+
+    async def find_exact(
+        self,
+        customer_id: str,
+        kind: str,
+        content: str,
+    ) -> CustomerMemory | None:
+        statement = select(CustomerMemory).where(
+            CustomerMemory.customer_id == customer_id,
+            CustomerMemory.kind == kind,
+            CustomerMemory.content == content,
+        )
+        return await self.session.scalar(statement)
