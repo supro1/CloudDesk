@@ -28,6 +28,8 @@ htmlcov/
 node_modules/
 .next/
 out/
+coverage/
+*.tsbuildinfo
 
 # Terraform state, plans, and variable files
 .terraform/
