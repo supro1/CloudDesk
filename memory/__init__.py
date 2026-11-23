@@ -1,0 +1,1 @@
+"""Customer-memory safety helpers."""

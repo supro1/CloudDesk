@@ -48,6 +48,14 @@ Last checked while creating this file:
   `backend`, `tests`, and `integrations`, and Pylance reports no diagnostics in
   the new tool and integration modules. Approval persistence and the human
   decision/resume workflow remain in the later approval phase.
+- P7-1 through P7-4 are implemented: deterministic category/severity/escalation
+  helpers, injection scanning and escaped untrusted-text wrapping, customer
+  output validation, and reusable secret scrubbing for future memory callers.
+  These helpers are not yet wired into ticket APIs or a workflow graph.
+- Phase 7 local validation: all 160 pytest tests pass; Ruff passes for
+  `backend`, `tests`, `integrations`, `agents`, and `memory`; Pylance reports no
+  diagnostics in the changed Python modules. No Docker, cloud, or workflow
+  integration was added.
 - `README.md` is only a placeholder at this point.
 - CI has not been run. Frontend and deployment builds have not been run.
 - Cloud credentials have not been used; nothing has been applied to a real
@@ -61,8 +69,8 @@ validation. Do not copy planned features into the implemented/validated state.
 | Area | Status |
 |---|---|
 | Product requirements and target architecture | Specified in `CLAUDE.md`; documentation support files are being established. |
-| Application implementation | P6-1 through P6-4 are implemented; approval persistence, workflow agents, frontend, and deployment remain incomplete. |
-| Local validation | 134 tests pass with pytest. Ruff passes for `backend`, `tests`, and `integrations`. |
+| Application implementation | P7-1 through P7-4 are implemented as tested helper modules but are not workflow-integrated; specialist agents, workflow, frontend, and deployment remain incomplete. |
+| Local validation | 160 tests pass with pytest. Ruff passes for `backend`, `tests`, `integrations`, `agents`, and `memory`. |
 | CI | Not run/confirmed. |
 | Cloud credentials and deployment | Not used; nothing deployed. |
 
