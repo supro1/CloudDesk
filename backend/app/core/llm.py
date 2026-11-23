@@ -12,6 +12,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel, ValidationError
 
 from backend.app.core.config import Settings, get_settings
+from backend.app.core.observability import record_llm_call
 
 FakeResponseFactory = Callable[
     [type[BaseModel], str, str, int],
@@ -189,11 +190,18 @@ async def call_structured[ModelT: BaseModel](
             continue
 
         duration_ms = (perf_counter() - started_at) * 1000
+        estimated_cost = 0.0 if isinstance(provider, FakeLLM) else None
+        await record_llm_call(
+            schema_name=schema.__name__,
+            usage=total_usage,
+            duration_ms=duration_ms,
+            estimated_cost=estimated_cost,
+        )
         return StructuredCallResult(
             output=output,
             usage=total_usage,
             duration_ms=duration_ms,
-            estimated_cost=0.0 if isinstance(provider, FakeLLM) else None,
+            estimated_cost=estimated_cost,
         )
 
     if last_error is not None:

@@ -147,12 +147,12 @@ Sub-tasks in the same phase that do not share files can be open at the same time
 
 | Task | Branch | Status |
 |------|--------|--------|
-| P10-1 · Support state and checkpointer | `feature/graph-state-checkpointer` | Pending ❌ |
-| P10-2 · Supervisor graph nodes | `feature/graph-nodes-supervisor` | Pending ❌ |
-| P10-3 · Investigate graph nodes | `feature/graph-nodes-investigate` | Pending ❌ |
-| P10-4 · Resolution and risk nodes | `feature/graph-nodes-resolution` | Pending ❌ |
-| P10-5 · Graph wiring and run API | `feature/graph-run-api` | Pending ❌ |
-| P10-6 · Workflow tracer and events API | `feature/workflow-tracer-events` | Pending ❌ |
+| P10-1 · Support state and checkpointer | `feature/graph-state-checkpointer` | Completed ✅ |
+| P10-2 · Supervisor graph nodes | `feature/graph-nodes-supervisor` | Completed ✅ |
+| P10-3 · Investigate graph nodes | `feature/graph-nodes-investigate` | Completed ✅ |
+| P10-4 · Resolution and risk nodes | `feature/graph-nodes-resolution` | Completed ✅ |
+| P10-5 · Graph wiring and run API | `feature/graph-run-api` | Completed ✅ |
+| P10-6 · Workflow tracer and events API | `feature/workflow-tracer-events` | Completed ✅ |
 
 ---
 
@@ -268,9 +268,9 @@ Phases 4, 5, 6, and 7 start together once Phase 2 (and Phase 3, for Phase 4 only
 | 7 | Rules and guardrails | 4 | 4 |
 | 8 | Memory | 3 | 3 |
 | 9 | Specialist agents | 8 | 8 |
-| 10 | Workflow graph and trace | 6 | 0 |
+| 10 | Workflow graph and trace | 6 | 6 |
 | 11 | Approval and escalation | 5 | 0 |
 | 12 | Console shell | 4 | 0 |
 | 13 | Ticket workflow screen | 4 | 0 |
 | 14 | Evaluation and delivery | 5 | 0 |
-| **Total** | | **62** | **38** |
+| **Total** | | **62** | **44** |

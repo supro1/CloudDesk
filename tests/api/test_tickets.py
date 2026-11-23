@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from backend.app.core.config import Settings
-from backend.app.core.database import create_database_engine, create_tables, get_session
+from backend.app.core.database import create_database_engine, create_tables
 from backend.app.main import create_app
 from backend.app.models.entities import (
     ApprovalRequest,
@@ -54,20 +54,17 @@ async def ticket_client() -> AsyncIterator[tuple[TestClient, async_sessionmaker[
         )
         await session.commit()
 
-    app = create_app(
-        Settings(
-            _env_file=None,
-            demo_mode=True,
-            jwt_secret="test-jwt-secret-with-at-least-32-bytes",
+    with TestClient(
+        create_app(
+            Settings(
+                _env_file=None,
+                demo_mode=True,
+                jwt_secret="test-jwt-secret-with-at-least-32-bytes",
+                checkpoint_db_path=":memory:",
+            ),
+            database_session_factory=session_maker,
         )
-    )
-
-    async def override_session() -> AsyncIterator[AsyncSession]:
-        async with session_maker() as session:
-            yield session
-
-    app.dependency_overrides[get_session] = override_session
-    with TestClient(app) as client:
+    ) as client:
         yield client, session_maker
     await engine.dispose()
 
@@ -324,3 +321,74 @@ def test_ticket_routes_require_authentication_and_agent_role_for_writes(
 
     assert no_auth.status_code == 401
     assert forbidden.status_code == 403
+
+
+def test_workflow_run_persists_progress_and_safe_events(
+    ticket_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
+) -> None:
+    client, _ = ticket_client
+    agent_headers = _headers(client, "sam.agent@clouddesk.demo")
+    viewer_headers = _headers(client, "vic.viewer@clouddesk.demo")
+    created = _create_ticket(client, agent_headers)
+
+    started = client.post(
+        f"/api/v1/tickets/{created['id']}/run",
+        headers=agent_headers,
+    )
+    workflow = client.get(
+        f"/api/v1/tickets/{created['id']}/workflow",
+        headers=viewer_headers,
+    )
+    events = client.get(
+        f"/api/v1/tickets/{created['id']}/events",
+        headers=viewer_headers,
+    )
+
+    assert started.status_code == 202, started.text
+    assert started.json()["status"] == "queued"
+    assert workflow.status_code == 200, workflow.text
+    workflow_data = workflow.json()
+    assert workflow_data["status"] == "completed"
+    assert workflow_data["category"] == "storage_quota"
+    assert workflow_data["completed_nodes"][-1] == "memory_update"
+    assert "customer_reply" in workflow_data["resolution"]
+    assert events.status_code == 200, events.text
+    event_data = events.json()
+    assert event_data["total"] > 0
+    assert any(item["event_type"] == "llm_called" for item in event_data["items"])
+    assert any(item["event_type"] == "tool_called" for item in event_data["items"])
+    tool_events = [
+        item for item in event_data["items"] if item["event_type"] == "tool_called"
+    ]
+    assert any(item["payload"]["result_summary"] is not None for item in tool_events)
+    assert all(
+        "prompt" not in str(item["payload"]).casefold()
+        and "arguments" not in str(item["payload"]).casefold()
+        for item in event_data["items"]
+    )
+    serialized_events = str(event_data).casefold()
+    assert "maya@example.test" not in serialized_events
+    assert "uploads are failing." not in serialized_events
+
+
+def test_workflow_routes_enforce_agent_and_viewer_permissions(
+    ticket_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
+) -> None:
+    client, _ = ticket_client
+    created = _create_ticket(
+        client,
+        _headers(client, "sam.agent@clouddesk.demo"),
+    )
+    viewer_headers = _headers(client, "vic.viewer@clouddesk.demo")
+
+    forbidden = client.post(
+        f"/api/v1/tickets/{created['id']}/run",
+        headers=viewer_headers,
+    )
+    missing = client.get(
+        f"/api/v1/tickets/{created['id']}/workflow",
+        headers=viewer_headers,
+    )
+
+    assert forbidden.status_code == 403
+    assert missing.status_code == 404

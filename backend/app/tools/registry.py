@@ -4,11 +4,17 @@ import asyncio
 import logging
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
+from time import perf_counter
 from typing import Any
 
 from langchain_core.tools import BaseTool
 
 from backend.app.core.config import Settings, get_settings
+from backend.app.core.observability import (
+    elapsed_ms,
+    record_tool_call,
+    summarize_tool_result,
+)
 from backend.app.tools.policy import ToolPolicy
 
 logger = logging.getLogger(__name__)
@@ -66,6 +72,27 @@ class ToolRegistry:
         arguments: Mapping[str, Any],
         *,
         approved: bool = False,
+    ) -> ToolResult:
+        started_at = perf_counter()
+        result = await self._execute(name, arguments, approved=approved)
+        await record_tool_call(
+            tool_name=name,
+            ok=result.ok,
+            error_type=result.error_type,
+            requires_approval=result.requires_approval,
+            result_summary=(
+                summarize_tool_result(name, result.result) if result.ok else None
+            ),
+            duration_ms=elapsed_ms(started_at),
+        )
+        return result
+
+    async def _execute(
+        self,
+        name: str,
+        arguments: Mapping[str, Any],
+        *,
+        approved: bool,
     ) -> ToolResult:
         tool = self._tools.get(name)
         if tool is None:
