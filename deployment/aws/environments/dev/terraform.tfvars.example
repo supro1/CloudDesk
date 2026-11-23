@@ -1,0 +1,4 @@
+region             = "us-east-1"
+project_name       = "clouddesk"
+environment        = "dev"
+log_retention_days = 30

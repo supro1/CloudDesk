@@ -37,5 +37,7 @@ coverage/
 *.tfstate.*
 *.tfvars
 *.tfplan
+tfplan
+*.plan
 backend.hcl
 crash.log

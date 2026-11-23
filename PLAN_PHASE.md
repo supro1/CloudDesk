@@ -179,8 +179,9 @@ changing implementation.
 
 - **Goal:** Gate product quality and prepare container, CI, and cloud deployment
   configurations without claiming unexecuted deployments.
-- **Files:** `tests/evaluation/`; `tests/deployment/`; `datasets/`;
-  Docker/Compose files; `.github/workflows/`; `deployment/`; documentation.
+- **Files:** `tests/evaluation/datasets/`; `tests/evaluation/test_thresholds.py`;
+  `tests/deployment/`; `backend/Dockerfile`; `frontend/Dockerfile`;
+  `docker-compose.yml`; `.github/workflows/`; `deployment/`; documentation.
 - **Requirements:** All F1–F14 and N1–N8; evaluation thresholds.
 - **Tests:** Full offline suite, evaluation thresholds, container hygiene,
   Terraform validation, secret-file checks, and smoke tests where available.

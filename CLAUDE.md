@@ -400,8 +400,8 @@ temp SQLite, `CHECKPOINT_DB_PATH=:memory:`). Auth fixtures: `agent_headers`, `ad
 | `tests/rag/` | ingest count, expected article for key queries, modes, cache, RRF, rerank, filters |
 | `tests/agents/` | one test per specialist behaviour |
 | `tests/workflow/` | graph shape, routing, risk levels, e2e low-risk, pause/resume, rejection, GDPR policy escalation |
-| `tests/evaluation/` | labeled evaluation cases and offline category checks; threshold metrics are added in the evaluation phase |
-| `tests/deployment/` | compose services, Dockerfile hygiene (non-root, HEALTHCHECK), `.env.example` coverage, no committed `.env` |
+| `tests/evaluation/` | labeled cases and offline threshold checks for classification, retrieval, escalation, citations, and grounding |
+| `tests/deployment/` | Compose wiring, Dockerfile hygiene, `.env.example` coverage, no committed `.env`, and Terraform/CI scaffolds |
 | `frontend/__tests__/` | StatusPill, EmptyState, WorkflowSteps.deriveSteps, api helpers |
 
 **Evaluation thresholds – these fail the build:**
@@ -414,7 +414,8 @@ temp SQLite, `CHECKPOINT_DB_PATH=:memory:`). Auth fixtures: `agent_headers`, `ad
 | citation rate | ≥ 0.90 |
 | grounding rate (steps present in reply) | ≥ 0.90 |
 
-Adding an eval case: append to `eval_cases.json` with a valid `expected_category`.
+Adding an eval case: append to `tests/evaluation/datasets/eval_cases.json` with a valid `expected_category`,
+an `expected_escalation`, and an `expected_article` when the knowledge library has a suitable article.
 pytest: `asyncio_mode = "auto"`, `loop_scope = "session"` in `pyproject.toml`. Do not mix in
 `@pytest.mark.asyncio` with a different scope.
 
@@ -456,27 +457,27 @@ then `development` promotes to `testing`, then `main`. Remote:
   `output: "standalone"`, non-root, `HEALTHCHECK` on `/api/health`). Pin base images before production.
 - **Compose:** `frontend → backend → redis, qdrant`, `depends_on: service_healthy`, named volumes,
   `restart: unless-stopped`.
-- **Terraform:** roots `deployment/{aws,azure,gcp}` compose shared modules
-  (networking, container-registry, secrets, compute, load-balancer, monitoring, redis). Environments are
-  var-files (`environments/{dev,staging,prod}/terraform.tfvars`), never copies of code. Remote state via
-  `backend.hcl` (git-ignored). Secrets only through `TF_VAR_*` env vars, never in committed files.
-- **Mapping:** AWS = ECR/ECS Fargate/ALB/Secrets Manager/CloudWatch · Azure = ACR/Container Apps/Key Vault/
-  Log Analytics · GCP = Artifact Registry/Cloud Run/Secret Manager/Cloud Logging. Supabase, Qdrant Cloud
-  and the LLM API are external on every cloud.
-- **Scripts:** `deployment/scripts/{deploy,build_and_push,smoke_test,rollback,destroy}.sh <cloud> <env>`.
-  `--auto-approve` is refused for staging and prod by the script itself.
-- **CI (GitHub Actions):** `test.yml` (ruff, pytest, npm lint/test/build per matrix), `security.yml`
-  (gitleaks, pip-audit, Trivy, checkov), `docker-build.yml`, `terraform-validate.yml`. Deploy:
-  `_deploy.yml` reusable pipeline `bootstrap-registry → build-and-push → plan → [approval] → apply → smoke`.
-  Prod uses GitHub Environment `prod-apply` with required reviewers. Cloud auth is OIDC, no long-lived keys.
-- **Image tags = git SHA.** The artifact that was tested is the artifact that ships.
+- **Compose:** `docker-compose.yml` runs frontend, backend, Redis, Qdrant, and a one-shot knowledge
+  indexer. SQLite/checkpoints, Redis, and Qdrant use named volumes; only the browser-facing ports are
+  published on loopback. `NEXT_PUBLIC_API_URL` must be reachable from the user's browser.
+- **Terraform:** `deployment/{aws,azure,gcp}` currently provide registry and baseline logging roots
+  (ECR/CloudWatch, ACR/Log Analytics, Artifact Registry). Example remote-state and dev variable files
+  contain placeholders only. Compute, ingress, secret resources, managed databases/Redis/Qdrant, and
+  provider deployment workflows remain future work; do not describe these roots as complete app
+  deployments.
+- **CI (GitHub Actions):** `test.yml`, `security.yml`, `docker-build.yml`, and
+  `terraform-validate.yml` define tests, image builds without publishing, security scans, and
+  provider-root validation. No deploy/apply workflow is present.
+- **Status:** 203 backend tests, Ruff, 9 frontend tests, frontend lint/build, and the CD-1002 demo
+  rejection path passed locally. Docker and Terraform CLIs were unavailable; GitHub workflows have
+  not been run, and no cloud credentials or resources were used.
 
 ### 15.1 Honest status rule
 
 Track what is **implemented**, **validated locally**, **needs cloud credentials**, and **actually deployed**
-separately. Do not write "deployed" or "passes in CI" until it has. Current state: no cloud credentials
-used; nothing applied to a real account; workflows not executed on GitHub until the repo is pushed with
-secrets configured.
+separately. Do not write "deployed" or "passes in CI" until it has. Current state: delivery files are
+implemented; no cloud credentials were used, no resources were applied, Docker/Terraform validation
+requires an equipped runner, and GitHub workflows have not been run.
 
 ---
 
@@ -535,7 +536,9 @@ the same principles: policy outside the model, approval gates, audit trail.
 
 ## 19. Phase plan
 
-The 13-phase build is [`PLAN_PHASE.md`](PLAN_PHASE.md). Each phase states a goal, files touched,
+The 13-phase product plan is [`PLAN_PHASE.md`](PLAN_PHASE.md). [`TASKS.md`](TASKS.md) uses 14 execution
+phases because memory was pulled forward as tracker Phase 8; tracker Phase 14 maps to product Phase 13.
+Each product phase states a goal, files touched,
 PRD rows covered, tests added, a `make demo` checkpoint, and exit criteria. [`PLAN.md`](PLAN.md)
 is the requirement catalog. [`MEMORY.md`](MEMORY.md) holds locked facts and honest status. The
 agent procedure is [`.cursor/skills/clouddesk-support/SKILL.md`](.cursor/skills/clouddesk-support/SKILL.md).
@@ -545,19 +548,20 @@ this file. Stage 17 is optional and is not a core exit criterion.
 
 | Phase | Name | Status |
 |---|---|---|
-| 1 | Runtime skeleton | not started |
-| 2 | Persistence and demo data | not started |
-| 3 | Identity and request guards | not started |
-| 4 | Support API | not started |
-| 5 | Knowledge pipeline | not started |
+| 1 | Runtime skeleton | complete |
+| 2 | Persistence and demo data | complete |
+| 3 | Identity and request guards | complete |
+| 4 | Support API | complete |
+| 5 | Knowledge pipeline | complete |
 | 6 | Tools and policy | complete |
 | 7 | Rules and guardrails | complete |
-| 8 | Specialist agents | complete |
-| 9 | Workflow graph and trace | complete |
-| 10 | Approval and escalation | completed |
-| 11 | Memory | complete |
-| 12 | Agent console shell and read-only lists | completed |
-| 13 | Evaluation and delivery | not started |
+| 8 | Memory (tracker phase) | complete |
+| 9 | Specialist agents | complete |
+| 10 | Workflow graph and trace | complete |
+| 11 | Approval and escalation | complete |
+| 12 | Console shell | complete |
+| 13 | Ticket workflow screen | complete |
+| 14 | Evaluation and delivery | implemented; local/CI/cloud status reported separately |
 
 ---
 

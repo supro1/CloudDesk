@@ -1,0 +1,6 @@
+location            = "eastus"
+project_name        = "clouddesk"
+environment         = "dev"
+resource_group_name = "replace-with-dev-resource-group"
+registry_name       = "replacewithuniqueacrname"
+log_retention_days  = 30

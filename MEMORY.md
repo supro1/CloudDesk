@@ -24,92 +24,51 @@ status change. Do not treat plans as implementation evidence.
 
 ## Current repository status
 
-Last checked after completing tracker Phase 10 (Workflow graph and trace),
-which maps to `PLAN_PHASE.md` Phase 9. Tracker Phase 8 (Memory) maps to
-`PLAN_PHASE.md` Phase 11:
-
-- The working tree contains the starter package under `src/project_1/` and
-  backend core settings and JSON logging modules, health routes, and request-ID
-  handling.
-- P2-1 through P2-4 are implemented: SQLAlchemy entities, PostgreSQL schema
-  and migrations, repositories, and an atomic demo bootstrap with committed
-  sample fixtures.
-- P3-1 and P3-2 are implemented: HS256 JWT verification and role enforcement,
-  plus demo login and current-profile routes that issue eight-hour,
-  Supabase-compatible tokens for the seeded demo profiles.
-- P5-1 and P5-2 are implemented: knowledge article loading/chunking,
-  deterministic fake embeddings, and in-memory and Qdrant vector stores.
-- P5-2 local validation: all 95 pytest tests pass; the project Ruff target and
-  Ruff on the changed RAG modules pass. Qdrant adapter behavior was tested with
-  a fake client; no live Qdrant service was used.
-- P6-1 through P6-4 are implemented: tool registry and policy, repository-backed
-  read tools, approval-gated refund and workspace-reset tools, and mock-only
-  billing/workspace/status integrations. The registry is initialized with the
-  application; no public tool-execution route or real integration is present.
-- Phase 6 local validation: all 134 pytest tests pass, Ruff passes for
-  `backend`, `tests`, and `integrations`, and Pylance reports no diagnostics in
-  the new tool and integration modules. Approval persistence and the human
-  decision/resume workflow remain in the later approval phase.
-- P7-1 through P7-4 are implemented: deterministic category/severity/escalation
-  helpers, injection scanning and escaped untrusted-text wrapping, customer
-  output validation, and reusable secret scrubbing. The workflow now uses
-  classification/severity and output validation; later approval and
-  escalation execution remains separate.
-- P8-1 through P8-3 are implemented: expiring Redis/fakeredis memory,
-  customer-scoped SQL note recall and de-duplication, and checked resolution
-  recording with secret scrubbing and prohibited-text filtering. The workflow
-  now recalls and updates safe customer notes.
-- Phase 8 focused validation: all 6 tests in `tests/unit/test_memory.py` pass,
-  the full offline suite passes with 166 tests, and Ruff passes on the changed
-  Python modules.
-- P9-1 through P9-8 are implemented: typed workflow schemas, a configurable
-  structured-output helper with an offline fake provider, six specialist
-  agents, and 13 evaluation cases covering all ten categories. The
-  specialists are wired into the workflow graph.
-- Phase 9 focused validation: all 20 tests in `tests/agents/` pass; the full
-  offline suite passes with 186 tests; targeted Ruff checks pass, and the
-  checked Pylance diagnostics report no issues in the selected changed files.
-- P10-1 through P10-6 are implemented: shared graph state and reducers,
-  SQLite/in-memory checkpointing, specialist nodes, run/status/events APIs,
-  workflow persistence, and privacy-conscious node/tool/LLM tracing.
-- Phase 10 local validation: the full offline suite passes with 191 tests;
-  targeted Ruff checks pass; selected Pylance diagnostics report no errors;
-  and `uv lock --check` passes. The full-repository Ruff command still reports
-  unrelated pre-existing findings outside the Phase 10 files.
-- The `.gitignore` excludes Python caches, pytest cache, local databases, and
-  build outputs. Phase 10's checkpoint path is covered by the existing
-  `data/` and `*.db` rules, so no additional ignore rule is required.
-- `README.md` is only a placeholder at this point.
-- CI has not been run. Frontend and deployment builds have not been run.
-- Cloud credentials have not been used; nothing has been applied to a real
-  cloud account.
-
-Update this section after inspecting current files and running the relevant
-validation. Do not copy planned features into the implemented/validated state.
+- Tracker Phases 1-14 are marked complete in `TASKS.md`. Tracker Phase 14 maps
+  to the broader Evaluation and delivery Phase 13 in `PLAN_PHASE.md`.
+- The product backend, workflow, support console, and offline test harness are
+  implemented. Phase 14 adds labeled quality thresholds, backend/frontend
+  container definitions, local Compose wiring, provider-specific Terraform
+  registry/logging roots, CI workflow definitions, and deployment hygiene
+  tests.
+- Terraform roots are starter scaffolds, not a complete hosted application:
+  compute, ingress, runtime secret wiring, database, Redis, and Qdrant cloud
+  resources still require environment-specific design.
+- Local validation: 203 backend tests passed; Ruff passed; 9 frontend tests,
+  frontend lint, and the standalone production build passed. The CD-1002
+  in-memory demo completed through a recorded rejection.
+- Docker and Terraform CLIs are not installed in the current environment.
+  Compose parsing and static hygiene tests passed, but actual image builds and
+  `terraform validate` remain unverified locally.
+- GitHub Actions workflows were authored but have not run on GitHub.
+  No cloud credentials were used and no real resources were applied.
+- `.gitignore` covers local databases, environment files, Terraform state,
+  variable files, backend config, and plan files.
 
 ## Current delivery status
 
 | Area | Status |
 |---|---|
-| Product requirements and target architecture | Specified in `CLAUDE.md`; Phase 8, 9, and 10 explanation, design-evolution, infrastructure, and interview documents are present. |
-| Application implementation | P7-1 through P7-4, P8-1 through P8-3, P9-1 through P9-8, and P10-1 through P10-6 are implemented and tested. Approval workflow, frontend, and delivery remain incomplete. |
-| Local validation | Full offline suite: 191 passed. Phase 10 targeted Ruff checks pass, selected changed-file Pylance diagnostics report no errors, and `uv lock --check` passes. |
-| CI | Not run/confirmed. |
+| Product requirements and target architecture | Specified in `CLAUDE.md`; Phase 14 explanation, design-evolution, infrastructure, and interview documents are present. |
+| Application and Phase 14 implementation | Tracker Phases 1-14 are implemented; cloud roots remain baseline scaffolds rather than complete application deployments. |
+| Local validation | 203 backend tests, Ruff, 9 frontend tests, frontend lint/build, and the in-memory CD-1002 rejection demo passed. |
+| Docker and Terraform CLI validation | Not run; the CLIs are unavailable in this environment. |
+| CI | Workflow files are present but not run/confirmed on GitHub. |
 | Cloud credentials and deployment | Not used; nothing deployed. |
 
 ## Open decisions and known mismatches
 
-- `TASKS.md` has 14 tracker phases while `CLAUDE.md`/`PLAN_PHASE.md` use 13
-  product phases. The tracker mapping table identifies these numbering
-  differences; tracker Phase 10 maps to `PLAN_PHASE.md` Phase 9.
+- `TASKS.md` has 14 execution phases while `PLAN_PHASE.md` has 13 product
+  phases. The mapping table identifies the difference; tracker Phase 14 maps
+  to product Phase 13.
 - `CLAUDE.md` references a course Git/GitHub workflow document not present in
   this repository. Confirm branch policy from the actual source before relying
   on it.
 - The target architecture references external course materials and a separate
   deployment-agent project that are not in this repository. Do not assume those
   dependencies exist locally.
-- Exact route payloads should be kept in sync with backend schemas and frontend
-  types when implementation begins.
+- Complete cloud compute, networking/ingress, secrets, and managed data-service
+  infrastructure only after environment and cost requirements are approved.
 
 ## Working agreements
 
