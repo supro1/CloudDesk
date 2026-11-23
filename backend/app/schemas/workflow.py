@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -156,6 +157,53 @@ class TicketSummary(WorkflowModel):
         return normalized
 
 
+class WorkflowStartResponse(WorkflowModel):
+    workflow_id: str
+    status: Literal["queued"]
+
+
+class WorkflowResolutionPreview(WorkflowModel):
+    summary: str
+    customer_reply: str
+    output_valid: bool
+    output_issues: list[str]
+
+
+class WorkflowStatusResponse(WorkflowModel):
+    workflow_id: str
+    status: str
+    current_node: str | None = None
+    completed_nodes: list[str] = Field(default_factory=list)
+    category: TicketCategory | None = None
+    severity: TicketSeverity | None = None
+    severity_reason: str | None = None
+    summary: str | None = None
+    risk_level: Literal["low", "high"] | None = None
+    evidence: list[Evidence] = Field(default_factory=list)
+    diagnosis: Diagnosis | None = None
+    resolution: WorkflowResolutionPreview | None = None
+    token_usage: dict[str, int] = Field(default_factory=dict)
+    error: str | None = None
+
+
+class WorkflowEventResponse(WorkflowModel):
+    id: str
+    event_type: str
+    node_name: str | None = None
+    tool_name: str | None = None
+    payload: dict[str, Any]
+    duration_ms: int | None = None
+    input_tokens: int | None = None
+    output_tokens: int | None = None
+    estimated_cost: float | None = None
+    created_at: datetime
+
+
+class WorkflowEventPageResponse(WorkflowModel):
+    items: list[WorkflowEventResponse]
+    total: int
+
+
 __all__ = [
     "Classification",
     "CustomerContext",
@@ -174,5 +222,10 @@ __all__ = [
     "SeverityAssessment",
     "TicketSeverity",
     "TicketSummary",
+    "WorkflowEventPageResponse",
+    "WorkflowEventResponse",
     "WorkflowModel",
+    "WorkflowResolutionPreview",
+    "WorkflowStartResponse",
+    "WorkflowStatusResponse",
 ]

@@ -553,7 +553,7 @@ this file. Stage 17 is optional and is not a core exit criterion.
 | 6 | Tools and policy | complete |
 | 7 | Rules and guardrails | complete |
 | 8 | Specialist agents | complete |
-| 9 | Workflow graph and trace | not started |
+| 9 | Workflow graph and trace | complete |
 | 10 | Approval and escalation | not started |
 | 11 | Memory | complete |
 | 12 | Agent console | not started |

@@ -218,10 +218,46 @@ Workflow start response:
 }
 ```
 
-The run endpoint responds with `409 Conflict` if the ticket is already
-`waiting_on_approval`. Resuming a run that is not paused also returns `409`.
-Validation errors return `422`, missing resources return `404`, and insufficient
-role returns `403`.
+`POST /api/v1/tickets/{ticket_id}/run` returns `202 Accepted` and starts the
+workflow in the background. It returns `409 Conflict` if the ticket is already
+`waiting_on_approval` or has an active workflow. Missing tickets return `404`,
+and insufficient role returns `403`.
+
+`GET /api/v1/tickets/{ticket_id}/workflow` returns the latest workflow's
+status and a safe summary of its progress: current/completed node names,
+classification, severity, cited evidence, diagnosis, customer-reply preview,
+risk level, and token counts. It does not expose raw prompts, internal notes,
+tool arguments, or ticket bodies. If no workflow exists for the ticket, it
+returns `404`.
+
+`GET /api/v1/tickets/{ticket_id}/events` returns the latest run's event page:
+
+```json
+{
+  "items": [
+    {
+      "id": "<uuid>",
+      "event_type": "node_completed",
+      "node_name": "understand_ticket",
+      "tool_name": null,
+      "payload": {"status": "completed", "cost_available": false},
+      "duration_ms": 12,
+      "input_tokens": null,
+      "output_tokens": null,
+      "estimated_cost": null,
+      "created_at": "2026-01-01T00:00:00Z"
+    }
+  ],
+  "total": 1
+}
+```
+
+Events are ordered by creation time and expose only operational metadata.
+They include allow-listed summaries of tool results, but never raw prompts,
+hidden reasoning, customer message bodies, tool arguments, raw tool results,
+secrets, or other customers' data. Estimated cost is `null` when the selected
+provider does not report an available estimate.
+If no workflow exists for the ticket, this endpoint returns `404`.
 
 ## Approvals
 

@@ -24,8 +24,8 @@ status change. Do not treat plans as implementation evidence.
 
 ## Current repository status
 
-Last checked after completing tracker Phase 9 (Specialist agents), which maps
-to `PLAN_PHASE.md` Phase 8. Tracker Phase 8 (Memory) maps to
+Last checked after completing tracker Phase 10 (Workflow graph and trace),
+which maps to `PLAN_PHASE.md` Phase 9. Tracker Phase 8 (Memory) maps to
 `PLAN_PHASE.md` Phase 11:
 
 - The working tree contains the starter package under `src/project_1/` and
@@ -33,7 +33,7 @@ to `PLAN_PHASE.md` Phase 8. Tracker Phase 8 (Memory) maps to
   handling.
 - P2-1 through P2-4 are implemented: SQLAlchemy entities, PostgreSQL schema
   and migrations, repositories, and an atomic demo bootstrap with committed
-  sample fixtures. The remaining platform features are not implemented yet.
+  sample fixtures.
 - P3-1 and P3-2 are implemented: HS256 JWT verification and role enforcement,
   plus demo login and current-profile routes that issue eight-hour,
   Supabase-compatible tokens for the seeded demo profiles.
@@ -52,25 +52,33 @@ to `PLAN_PHASE.md` Phase 8. Tracker Phase 8 (Memory) maps to
   decision/resume workflow remain in the later approval phase.
 - P7-1 through P7-4 are implemented: deterministic category/severity/escalation
   helpers, injection scanning and escaped untrusted-text wrapping, customer
-  output validation, and reusable secret scrubbing for future memory callers.
-  These helpers are not yet wired into ticket APIs or a workflow graph.
+  output validation, and reusable secret scrubbing. The workflow now uses
+  classification/severity and output validation; later approval and
+  escalation execution remains separate.
 - P8-1 through P8-3 are implemented: expiring Redis/fakeredis memory,
   customer-scoped SQL note recall and de-duplication, and checked resolution
-  recording with secret scrubbing and prohibited-text filtering. Workflow
-  nodes do not call the memory facades yet.
+  recording with secret scrubbing and prohibited-text filtering. The workflow
+  now recalls and updates safe customer notes.
 - Phase 8 focused validation: all 6 tests in `tests/unit/test_memory.py` pass,
   the full offline suite passes with 166 tests, and Ruff passes on the changed
   Python modules.
 - P9-1 through P9-8 are implemented: typed workflow schemas, a configurable
   structured-output helper with an offline fake provider, six specialist
-  agents, and 13 evaluation cases covering all ten categories. Specialist
-  classes are individually callable but are not yet wired into a LangGraph.
+  agents, and 13 evaluation cases covering all ten categories. The
+  specialists are wired into the workflow graph.
 - Phase 9 focused validation: all 20 tests in `tests/agents/` pass; the full
   offline suite passes with 186 tests; targeted Ruff checks pass, and the
   checked Pylance diagnostics report no issues in the selected changed files.
+- P10-1 through P10-6 are implemented: shared graph state and reducers,
+  SQLite/in-memory checkpointing, specialist nodes, run/status/events APIs,
+  workflow persistence, and privacy-conscious node/tool/LLM tracing.
+- Phase 10 local validation: the full offline suite passes with 191 tests;
+  targeted Ruff checks pass; selected Pylance diagnostics report no errors;
+  and `uv lock --check` passes. The full-repository Ruff command still reports
+  unrelated pre-existing findings outside the Phase 10 files.
 - The `.gitignore` excludes Python caches, pytest cache, local databases, and
-  build outputs. Neither Phase 8 nor Phase 9 introduced generated files that
-  require additional ignore rules.
+  build outputs. Phase 10's checkpoint path is covered by the existing
+  `data/` and `*.db` rules, so no additional ignore rule is required.
 - `README.md` is only a placeholder at this point.
 - CI has not been run. Frontend and deployment builds have not been run.
 - Cloud credentials have not been used; nothing has been applied to a real
@@ -83,17 +91,17 @@ validation. Do not copy planned features into the implemented/validated state.
 
 | Area | Status |
 |---|---|
-| Product requirements and target architecture | Specified in `CLAUDE.md`; Phase 8 and Phase 9 explanation, design-evolution, infrastructure, and interview documents are present. |
-| Application implementation | P7-1 through P7-4, P8-1 through P8-3, and P9-1 through P9-8 are implemented as tested components. Specialist agents are not yet workflow-integrated; graph, frontend, and deployment remain incomplete. |
-| Local validation | Phase 9 agent tests: 20 passed. Full offline suite: 186 passed. Targeted Ruff checks pass; selected changed-file Pylance diagnostics report no issues. |
+| Product requirements and target architecture | Specified in `CLAUDE.md`; Phase 8, 9, and 10 explanation, design-evolution, infrastructure, and interview documents are present. |
+| Application implementation | P7-1 through P7-4, P8-1 through P8-3, P9-1 through P9-8, and P10-1 through P10-6 are implemented and tested. Approval workflow, frontend, and delivery remain incomplete. |
+| Local validation | Full offline suite: 191 passed. Phase 10 targeted Ruff checks pass, selected changed-file Pylance diagnostics report no errors, and `uv lock --check` passes. |
 | CI | Not run/confirmed. |
 | Cloud credentials and deployment | Not used; nothing deployed. |
 
 ## Open decisions and known mismatches
 
-- `TASKS.md` is a pre-existing, more granular execution tracker with 14 numbered
-  phases. `CLAUDE.md` is authoritative and specifies 13 phases; reconcile
-  tracker numbering and mappings before using it as a status authority.
+- `TASKS.md` has 14 tracker phases while `CLAUDE.md`/`PLAN_PHASE.md` use 13
+  product phases. The tracker mapping table identifies these numbering
+  differences; tracker Phase 10 maps to `PLAN_PHASE.md` Phase 9.
 - `CLAUDE.md` references a course Git/GitHub workflow document not present in
   this repository. Confirm branch policy from the actual source before relying
   on it.
