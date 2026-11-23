@@ -400,7 +400,7 @@ temp SQLite, `CHECKPOINT_DB_PATH=:memory:`). Auth fixtures: `agent_headers`, `ad
 | `tests/rag/` | ingest count, expected article for key queries, modes, cache, RRF, rerank, filters |
 | `tests/agents/` | one test per specialist behaviour |
 | `tests/workflow/` | graph shape, routing, risk levels, e2e low-risk, pause/resume, rejection, GDPR policy escalation |
-| `tests/evaluation/` | threshold metrics over `datasets/eval_cases.json` |
+| `tests/evaluation/` | labeled evaluation cases and offline category checks; threshold metrics are added in the evaluation phase |
 | `tests/deployment/` | compose services, Dockerfile hygiene (non-root, HEALTHCHECK), `.env.example` coverage, no committed `.env` |
 | `frontend/__tests__/` | StatusPill, EmptyState, WorkflowSteps.deriveSteps, api helpers |
 
@@ -552,7 +552,7 @@ this file. Stage 17 is optional and is not a core exit criterion.
 | 5 | Knowledge pipeline | not started |
 | 6 | Tools and policy | complete |
 | 7 | Rules and guardrails | complete |
-| 8 | Specialist agents | not started |
+| 8 | Specialist agents | complete |
 | 9 | Workflow graph and trace | not started |
 | 10 | Approval and escalation | not started |
 | 11 | Memory | complete |

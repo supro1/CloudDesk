@@ -24,7 +24,8 @@ status change. Do not treat plans as implementation evidence.
 
 ## Current repository status
 
-Last checked after completing tracker Phase 8 (Memory), which maps to
+Last checked after completing tracker Phase 9 (Specialist agents), which maps
+to `PLAN_PHASE.md` Phase 8. Tracker Phase 8 (Memory) maps to
 `PLAN_PHASE.md` Phase 11:
 
 - The working tree contains the starter package under `src/project_1/` and
@@ -60,8 +61,16 @@ Last checked after completing tracker Phase 8 (Memory), which maps to
 - Phase 8 focused validation: all 6 tests in `tests/unit/test_memory.py` pass,
   the full offline suite passes with 166 tests, and Ruff passes on the changed
   Python modules.
-- The `.gitignore` already excludes Python caches, pytest cache, and local
-  database files; Phase 8 required no ignore-rule changes.
+- P9-1 through P9-8 are implemented: typed workflow schemas, a configurable
+  structured-output helper with an offline fake provider, six specialist
+  agents, and 13 evaluation cases covering all ten categories. Specialist
+  classes are individually callable but are not yet wired into a LangGraph.
+- Phase 9 focused validation: all 20 tests in `tests/agents/` pass; the full
+  offline suite passes with 186 tests; targeted Ruff checks pass, and the
+  checked Pylance diagnostics report no issues in the selected changed files.
+- The `.gitignore` excludes Python caches, pytest cache, local databases, and
+  build outputs. Neither Phase 8 nor Phase 9 introduced generated files that
+  require additional ignore rules.
 - `README.md` is only a placeholder at this point.
 - CI has not been run. Frontend and deployment builds have not been run.
 - Cloud credentials have not been used; nothing has been applied to a real
@@ -74,9 +83,9 @@ validation. Do not copy planned features into the implemented/validated state.
 
 | Area | Status |
 |---|---|
-| Product requirements and target architecture | Specified in `CLAUDE.md`; documentation support files are being established. |
-| Application implementation | P7-1 through P7-4 and P8-1 through P8-3 are implemented as tested helpers/services but are not workflow-integrated; specialist agents, workflow, frontend, and deployment remain incomplete. |
-| Local validation | All 6 focused Phase 8 memory tests pass; the full offline suite passes with 166 tests. Ruff passes on the changed Phase 8 Python modules. |
+| Product requirements and target architecture | Specified in `CLAUDE.md`; Phase 8 and Phase 9 explanation, design-evolution, infrastructure, and interview documents are present. |
+| Application implementation | P7-1 through P7-4, P8-1 through P8-3, and P9-1 through P9-8 are implemented as tested components. Specialist agents are not yet workflow-integrated; graph, frontend, and deployment remain incomplete. |
+| Local validation | Phase 9 agent tests: 20 passed. Full offline suite: 186 passed. Targeted Ruff checks pass; selected changed-file Pylance diagnostics report no issues. |
 | CI | Not run/confirmed. |
 | Cloud credentials and deployment | Not used; nothing deployed. |
 
