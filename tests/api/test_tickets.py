@@ -328,6 +328,101 @@ def test_ticket_routes_require_authentication_and_agent_role_for_writes(
     assert forbidden.status_code == 403
 
 
+async def test_ticket_actions_record_safe_replies_and_update_escalation_status(
+    ticket_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
+) -> None:
+    client, session_maker = ticket_client
+    agent_headers = _headers(client, "sam.agent@clouddesk.demo")
+    viewer_headers = _headers(client, "vic.viewer@clouddesk.demo")
+    async with session_maker() as session:
+        session.add(
+            Customer(
+                id="00000000-0000-4000-8000-000000000011",
+                name="Jordan Other",
+                email="other@example.test",
+                company_name="Other Company",
+            )
+        )
+        await session.commit()
+    created = _create_ticket(client, agent_headers)
+    ticket_id = str(created["id"])
+
+    reply = client.post(
+        f"/api/v1/tickets/{ticket_id}/reply",
+        headers=agent_headers,
+        json={"body": "I reviewed the issue and can help you with these steps."},
+    )
+    request_info = client.post(
+        f"/api/v1/tickets/{ticket_id}/request-info",
+        headers=agent_headers,
+        json={"body": "Could you share the time the upload failed?"},
+    )
+    detail = client.get(f"/api/v1/tickets/{ticket_id}", headers=viewer_headers)
+    blocked_reply = client.post(
+        f"/api/v1/tickets/{ticket_id}/reply",
+        headers=agent_headers,
+        json={"body": "Visit http://backend:8000 for details."},
+    )
+    cross_customer_reply = client.post(
+        f"/api/v1/tickets/{ticket_id}/reply",
+        headers=agent_headers,
+        json={"body": "The other customer is other@example.test."},
+    )
+    escalation = client.post(
+        f"/api/v1/tickets/{ticket_id}/escalate",
+        headers=agent_headers,
+        json={"team": "storage", "reason": "The customer needs specialist assistance."},
+    )
+    updated = client.get(f"/api/v1/tickets/{ticket_id}", headers=viewer_headers)
+
+    assert reply.status_code == 200, reply.text
+    assert reply.json()["sender_type"] == "agent"
+    assert reply.json()["is_internal"] is False
+    assert request_info.status_code == 200, request_info.text
+    assert detail.json()["status"] == "waiting_on_customer"
+    assert len(detail.json()["messages"]) == 3
+    assert blocked_reply.status_code == 422
+    assert cross_customer_reply.status_code == 422
+    assert escalation.status_code == 200, escalation.text
+    assert escalation.json()["team"] == "storage"
+    assert updated.json()["status"] == "escalated"
+
+    forbidden = client.post(
+        f"/api/v1/tickets/{ticket_id}/reply",
+        headers=viewer_headers,
+        json={"body": "This should not be sent."},
+    )
+    assert forbidden.status_code == 403
+
+
+def test_ticket_action_routes_reject_missing_tickets_and_invalid_content(
+    ticket_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
+) -> None:
+    client, _ = ticket_client
+    headers = _headers(client, "sam.agent@clouddesk.demo")
+    missing_id = "00000000-0000-4000-8000-000000000099"
+
+    missing_reply = client.post(
+        f"/api/v1/tickets/{missing_id}/reply",
+        headers=headers,
+        json={"body": "A reply for a missing ticket."},
+    )
+    blank_reply = client.post(
+        f"/api/v1/tickets/{missing_id}/reply",
+        headers=headers,
+        json={"body": "   "},
+    )
+    blank_escalation = client.post(
+        f"/api/v1/tickets/{missing_id}/escalate",
+        headers=headers,
+        json={"team": " ", "reason": "No team was supplied."},
+    )
+
+    assert missing_reply.status_code == 404
+    assert blank_reply.status_code == 422
+    assert blank_escalation.status_code == 422
+
+
 def test_workflow_run_persists_progress_and_safe_events(
     ticket_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
 ) -> None:

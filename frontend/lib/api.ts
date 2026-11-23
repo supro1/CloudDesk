@@ -1,5 +1,6 @@
 import type {
   AuthenticatedProfile,
+  ApprovalDecisionResponse,
   Customer,
   CustomerFilters,
   Escalation,
@@ -9,7 +10,11 @@ import type {
   Page,
   Pagination,
   Ticket,
+  TicketDetail,
   TicketFilters,
+  TicketMessage,
+  WorkflowStartResponse,
+  WorkflowStatus,
 } from "@/lib/types";
 
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000").replace(/\/$/, "");
@@ -110,6 +115,64 @@ export function listTickets(
   params: Pagination & TicketFilters = {},
 ): Promise<Page<Ticket>> {
   return request<Page<Ticket>>(`/tickets${queryString(params)}`);
+}
+
+export function getTicket(ticketId: string): Promise<TicketDetail> {
+  return request<TicketDetail>(`/tickets/${encodeURIComponent(ticketId)}`);
+}
+
+export function getTicketWorkflow(ticketId: string): Promise<WorkflowStatus> {
+  return request<WorkflowStatus>(`/tickets/${encodeURIComponent(ticketId)}/workflow`);
+}
+
+export function startTicketWorkflow(ticketId: string): Promise<WorkflowStartResponse> {
+  return request<WorkflowStartResponse>(`/tickets/${encodeURIComponent(ticketId)}/run`, {
+    method: "POST",
+  });
+}
+
+export function approveTicketAction(
+  approvalId: string,
+  reason?: string,
+): Promise<ApprovalDecisionResponse> {
+  return request<ApprovalDecisionResponse>(
+    `/approvals/${encodeURIComponent(approvalId)}/approve`,
+    { method: "POST", body: JSON.stringify({ reason: reason || null }) },
+  );
+}
+
+export function rejectTicketAction(
+  approvalId: string,
+  reason?: string,
+): Promise<ApprovalDecisionResponse> {
+  return request<ApprovalDecisionResponse>(
+    `/approvals/${encodeURIComponent(approvalId)}/reject`,
+    { method: "POST", body: JSON.stringify({ reason: reason || null }) },
+  );
+}
+
+export function sendTicketReply(ticketId: string, body: string): Promise<TicketMessage> {
+  return request<TicketMessage>(`/tickets/${encodeURIComponent(ticketId)}/reply`, {
+    method: "POST",
+    body: JSON.stringify({ body }),
+  });
+}
+
+export function requestTicketInformation(ticketId: string, body: string): Promise<TicketMessage> {
+  return request<TicketMessage>(`/tickets/${encodeURIComponent(ticketId)}/request-info`, {
+    method: "POST",
+    body: JSON.stringify({ body }),
+  });
+}
+
+export function escalateTicket(
+  ticketId: string,
+  escalation: { team: string; reason: string },
+): Promise<Escalation> {
+  return request<Escalation>(`/tickets/${encodeURIComponent(ticketId)}/escalate`, {
+    method: "POST",
+    body: JSON.stringify(escalation),
+  });
 }
 
 export function listCustomers(

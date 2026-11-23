@@ -70,6 +70,18 @@ class CustomerRepository(BaseRepository[Customer]):
         result = await self.session.scalars(statement)
         return list(result.all())
 
+    async def list_contact_values_excluding(self, customer_id: str) -> list[str]:
+        statement = select(Customer.name, Customer.email, Customer.company_name).where(
+            Customer.id != customer_id
+        )
+        result = await self.session.execute(statement)
+        return [
+            value.strip()
+            for row in result.all()
+            for value in row
+            if isinstance(value, str) and value.strip()
+        ]
+
 
 class SubscriptionRepository(BaseRepository[Subscription]):
     def __init__(self, session: AsyncSession) -> None:

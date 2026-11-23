@@ -1,9 +1,16 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   ACCESS_TOKEN_KEY,
+  approveTicketAction,
+  escalateTicket,
   getCurrentUser,
+  getTicketWorkflow,
   listTickets,
   NetworkError,
+  rejectTicketAction,
+  requestTicketInformation,
+  sendTicketReply,
+  startTicketWorkflow,
   USER_KEY,
 } from "@/lib/api";
 
@@ -59,5 +66,39 @@ describe("typed API client", () => {
   it("reports network failures as retryable network errors", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("offline")));
     await expect(listTickets()).rejects.toBeInstanceOf(NetworkError);
+  });
+
+  it("uses the documented ticket workflow and action routes", async () => {
+    const fetchMock = vi.fn<typeof fetch>().mockImplementation(async () => new Response(
+      JSON.stringify({}),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    ));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await startTicketWorkflow("ticket-1");
+    await getTicketWorkflow("ticket-1");
+    await approveTicketAction("approval-1", "Verified");
+    await rejectTicketAction("approval-1", "Not safe");
+    await sendTicketReply("ticket-1", "Reply text");
+    await requestTicketInformation("ticket-1", "Please share more details.");
+    await escalateTicket("ticket-1", { team: "billing", reason: "Needs review." });
+
+    const requests = fetchMock.mock.calls.map(([url, init]) => ({
+      url,
+      method: init?.method ?? "GET",
+      body: init?.body,
+    }));
+    expect(requests.map(({ url, method }) => [url, method])).toEqual([
+      ["http://localhost:8000/api/v1/tickets/ticket-1/run", "POST"],
+      ["http://localhost:8000/api/v1/tickets/ticket-1/workflow", "GET"],
+      ["http://localhost:8000/api/v1/approvals/approval-1/approve", "POST"],
+      ["http://localhost:8000/api/v1/approvals/approval-1/reject", "POST"],
+      ["http://localhost:8000/api/v1/tickets/ticket-1/reply", "POST"],
+      ["http://localhost:8000/api/v1/tickets/ticket-1/request-info", "POST"],
+      ["http://localhost:8000/api/v1/tickets/ticket-1/escalate", "POST"],
+    ]);
+    expect(JSON.parse(String(requests[2].body))).toEqual({ reason: "Verified" });
+    expect(JSON.parse(String(requests[4].body))).toEqual({ body: "Reply text" });
+    expect(JSON.parse(String(requests[6].body))).toEqual({ team: "billing", reason: "Needs review." });
   });
 });

@@ -133,6 +133,19 @@ server-assigned identifier. Ticket fields:
 | `POST /api/v1/tickets/{ticket_id}/request-info` | `agent`+ | Record a request for more customer information. |
 | `POST /api/v1/tickets/{ticket_id}/escalate` | `agent`+ | Escalate the ticket with a reason and named team. |
 
+Reply and request-information requests accept `{"body": "..."}` with a
+non-blank message up to 4,000 characters. Both create a non-internal agent
+message and return the recorded message. Replies are validated for secrets
+internal URLs, and known contact details for other customers before they are
+recorded; these mock integrations do not send real email. A request for
+information also changes the ticket status to `waiting_on_customer`.
+
+Escalation requests accept `{"team": "billing", "reason": "..."}` with a
+non-blank team (up to 120 characters) and reason (up to 1,000 characters).
+The response is the created escalation, and the ticket status becomes
+`escalated`. The latest workflow is linked when one exists. All three
+operations are audited and require the `agent` role or higher.
+
 ### Create ticket
 
 `POST /api/v1/tickets` accepts:

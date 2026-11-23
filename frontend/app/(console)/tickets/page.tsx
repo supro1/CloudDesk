@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import Link from "next/link";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Notice } from "@/components/ui/notice";
 import { PageHeading } from "@/components/ui/page-heading";
@@ -32,7 +33,12 @@ export default function TicketsPage() {
                 <tbody>
                   {data.items.map((ticket) => (
                     <tr key={ticket.id}>
-                      <td><div className="primary-cell">{ticket.ticket_number}</div><div className="secondary-cell">{ticket.subject}</div></td>
+                      <td>
+                        <Link className="primary-cell link-cell" href={`/tickets/${ticket.id}`}>
+                          {ticket.ticket_number}
+                        </Link>
+                        <div className="secondary-cell">{ticket.subject}</div>
+                      </td>
                       <td><StatusPill value={ticket.status} /></td>
                       <td><StatusPill value={ticket.category} /></td>
                       <td><StatusPill value={ticket.severity} /></td>
