@@ -91,7 +91,8 @@ _CATEGORY_RULES: tuple[tuple[TicketCategory, tuple[re.Pattern[str], ...]], ...] 
         (
             re.compile(
                 r"\b(?:permission|sharing|share a folder|invite (?:an )?"
-                r"external|access setting|workspace access)\b",
+                r"external|access setting|workspace access|share(?: a)? folder|"
+                r"external sharing)\b",
                 re.IGNORECASE,
             ),
         ),
@@ -111,7 +112,7 @@ _CATEGORY_RULES: tuple[tuple[TicketCategory, tuple[re.Pattern[str], ...]], ...] 
         (
             re.compile(
                 r"\b(?:feature request|please add|would like to have|"
-                r"request a feature|suggestion for)\b",
+                r"request a feature|suggestion for|dark mode|dark theme)\b",
                 re.IGNORECASE,
             ),
         ),
