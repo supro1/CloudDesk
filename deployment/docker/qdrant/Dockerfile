@@ -6,6 +6,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* \
     && groupadd --system --gid 10001 qdrant \
     && useradd --system --uid 10001 --gid qdrant --home-dir /qdrant --no-create-home qdrant \
+    && mkdir -p /qdrant/storage \
     && chown -R qdrant:qdrant /qdrant
 
 USER qdrant

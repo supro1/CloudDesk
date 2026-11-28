@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import subprocess
 from pathlib import Path
 
@@ -48,6 +49,10 @@ def test_compose_keeps_stateful_services_private_and_orders_bootstrap() -> None:
 
     backend = services["backend"]
     assert backend["ports"] == ["127.0.0.1:8000:8000"]
+    assert set(json.loads(backend["environment"]["CORS_ORIGINS"])) == {
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    }
     assert backend["depends_on"]["redis"]["condition"] == "service_healthy"
     assert backend["depends_on"]["qdrant"]["condition"] == "service_healthy"
     assert "backend-data:/app/data" in backend["volumes"]
@@ -64,6 +69,7 @@ def test_compose_keeps_stateful_services_private_and_orders_bootstrap() -> None:
     ).read_text(encoding="utf-8")
     assert "USER qdrant" in qdrant_dockerfile
     assert "apt-get install" in qdrant_dockerfile
+    assert "mkdir -p /qdrant/storage" in qdrant_dockerfile
     assert services["frontend"]["build"]["args"]["NEXT_PUBLIC_API_URL"] == (
         "${NEXT_PUBLIC_API_URL:-http://localhost:8000}"
     )

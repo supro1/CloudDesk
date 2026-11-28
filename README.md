@@ -9,8 +9,8 @@ control of consequential actions.
 1. Copy `.env.example` to `.env` and set a non-empty local `JWT_SECRET`.
 2. Run `docker compose config -q` to check the Compose configuration.
 3. Run `docker compose up --build`.
-4. Open `http://localhost:3000`. The browser reaches the API at
-   `http://localhost:8000`.
+4. Open `http://localhost:3000` (or `http://127.0.0.1:3000`). The browser reaches
+   the API at `http://localhost:8000`.
 
 The demo stores SQLite, Redis, and Qdrant data in Docker volumes. Redis and
 Qdrant are private to the Compose network. See [deployment details](docs/DEPLOYMENT.md)

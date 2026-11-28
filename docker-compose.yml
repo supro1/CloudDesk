@@ -6,7 +6,7 @@ services:
     environment:
       DEMO_MODE: "true"
       ENVIRONMENT: development
-      CORS_ORIGINS: '["http://localhost:3000"]'
+      CORS_ORIGINS: '["http://localhost:3000","http://127.0.0.1:3000"]'
       JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env before starting Compose}
       DATABASE_URL: sqlite+aiosqlite:////app/data/support.db
       CHECKPOINT_DB_PATH: /app/data/checkpoints.db

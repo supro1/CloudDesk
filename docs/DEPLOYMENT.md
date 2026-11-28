@@ -10,7 +10,7 @@ indexes the sample Markdown after the backend has seeded the demo database.
 1. Copy `.env.example` to `.env` and set a non-empty local `JWT_SECRET`.
 2. Run `docker compose config -q` to validate interpolation and YAML.
 3. Run `docker compose up --build`.
-4. Open `http://localhost:3000`; the browser calls the API at
+4. Open `http://localhost:3000` or `http://127.0.0.1:3000`; the browser calls the API at
    `http://localhost:8000`.
 
 `NEXT_PUBLIC_API_URL` is compiled into the frontend image. Set it to the
